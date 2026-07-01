@@ -1,8 +1,14 @@
 {
-  "name": "landing-page-test",
-  "main": "src/index.js",
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "zenithai",
   "compatibility_date": "2026-07-01",
+  "observability": {
+    "enabled": true
+  },
   "assets": {
-    "directory": "./public"
-  }
+    "directory": "."
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
 }
