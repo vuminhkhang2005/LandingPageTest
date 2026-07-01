@@ -493,6 +493,9 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   display: flex;
   justify-content: center;
   position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .visual-mockup {
