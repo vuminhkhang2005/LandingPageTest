@@ -84,6 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
     { skeletonId: 'features-skeleton', contentId: 'features-content' }
   ];
 
+  // Khởi tạo ẩn nội dung và hiện skeleton bằng JS để đảm bảo nếu JS lỗi/cache, trang vẫn hiển thị nội dung gốc
+  lazySections.forEach(config => {
+    const skeleton = document.getElementById(config.skeletonId);
+    const content = document.getElementById(config.contentId);
+    if (skeleton && content) {
+      skeleton.style.display = 'flex';
+      content.style.display = 'none';
+      content.style.opacity = '0';
+    }
+  });
+
   const sectionLazyOptions = {
     root: null,
     rootMargin: '100px',

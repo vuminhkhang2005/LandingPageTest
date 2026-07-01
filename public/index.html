@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Style CSS -->
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -254,8 +254,8 @@
           <p class="section-subtitle">Mọi công cụ bạn cần đều được tích hợp liền mạch trong một Canvas siêu tốc.</p>
         </div>
 
-        <!-- Skeleton placeholder for Features -->
-        <div class="section-skeleton" id="features-skeleton">
+        <!-- Skeleton placeholder for Features (Hidden by default, shown by JS if observer is active) -->
+        <div class="section-skeleton" id="features-skeleton" style="display: none;">
           <div class="skel-grid">
             <div class="skel-card"></div>
             <div class="skel-card"></div>
@@ -263,7 +263,7 @@
           </div>
         </div>
 
-        <div class="features-grid lazy-section-content" id="features-content" style="display: none; opacity: 0;">
+        <div class="features-grid lazy-section-content" id="features-content">
           <!-- Feature 1 -->
           <div class="feature-card animate-on-scroll" data-anim="fade-left" data-delay="1">
             <div class="feature-icon-wrapper purple-glow">
@@ -942,6 +942,6 @@
   </div>
 
   <!-- App JS -->
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
