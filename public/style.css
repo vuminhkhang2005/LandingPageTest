@@ -698,14 +698,14 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 }
 
 .widget-1 {
-  bottom: 12%;
-  left: -35px; /* Điều chỉnh lại khoảng cách dịch chuyển */
+  bottom: 15px;
+  left: 15px;
   animation-delay: 0s;
 }
 
 .widget-2 {
-  top: 15%;
-  right: -25px; /* Điều chỉnh lại khoảng cách dịch chuyển */
+  top: 55px;
+  right: 15px;
   animation-delay: 2s;
 }
 
