@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Style CSS -->
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
@@ -249,14 +249,23 @@
     <!-- Features Section -->
     <section class="features-section" id="features">
       <div class="container">
-        <div class="section-header text-center">
+        <div class="section-header text-center animate-on-scroll" data-anim="fade-up">
           <h2 class="section-title">Giải phóng sức mạnh của bạn</h2>
           <p class="section-subtitle">Mọi công cụ bạn cần đều được tích hợp liền mạch trong một Canvas siêu tốc.</p>
         </div>
 
-        <div class="features-grid">
+        <!-- Skeleton placeholder for Features -->
+        <div class="section-skeleton" id="features-skeleton">
+          <div class="skel-grid">
+            <div class="skel-card"></div>
+            <div class="skel-card"></div>
+            <div class="skel-card"></div>
+          </div>
+        </div>
+
+        <div class="features-grid lazy-section-content lazy-hidden" id="features-content">
           <!-- Feature 1 -->
-          <div class="feature-card animate-on-scroll">
+          <div class="feature-card animate-on-scroll" data-anim="fade-left" data-delay="1">
             <div class="feature-icon-wrapper purple-glow">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -270,7 +279,7 @@
           </div>
 
           <!-- Feature 2 -->
-          <div class="feature-card animate-on-scroll">
+          <div class="feature-card animate-on-scroll" data-anim="fade-right" data-delay="2">
             <div class="feature-icon-wrapper blue-glow">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -285,7 +294,7 @@
           </div>
 
           <!-- Feature 3 -->
-          <div class="feature-card animate-on-scroll">
+          <div class="feature-card animate-on-scroll" data-anim="fade-left" data-delay="3">
             <div class="feature-icon-wrapper green-glow">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="16 18 22 12 16 6"/>
@@ -299,7 +308,7 @@
           </div>
 
           <!-- Feature 4 -->
-          <div class="feature-card animate-on-scroll">
+          <div class="feature-card animate-on-scroll" data-anim="fade-right" data-delay="4">
             <div class="feature-icon-wrapper pink-glow">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"/>
@@ -318,32 +327,32 @@
     <!-- Technical Specs Section -->
     <section class="specs-section" id="specs">
       <div class="container">
-        <div class="section-header text-center">
+        <div class="section-header text-center animate-on-scroll" data-anim="scale-up">
           <h2 class="section-title">Thông số kỹ thuật & Hiệu năng</h2>
           <p class="section-subtitle">Kiến trúc hạ tầng vượt trội, tối ưu hóa cho tốc độ xử lý và tính bảo mật thông tin.</p>
         </div>
 
         <div class="specs-grid">
           <!-- Spec item 1 -->
-          <div class="spec-card animate-on-scroll">
+          <div class="spec-card animate-on-scroll" data-anim="flip-up" data-delay="1">
             <span class="spec-value">120ms</span>
             <h3 class="spec-title">Độ trễ trung bình</h3>
             <p class="spec-desc">Phản hồi và hoàn thành các tác vụ phức tạp với tốc độ cực nhanh nhờ hạ tầng mạng Edge toàn cầu.</p>
           </div>
           <!-- Spec item 2 -->
-          <div class="spec-card animate-on-scroll">
+          <div class="spec-card animate-on-scroll" data-anim="flip-up" data-delay="2">
             <span class="spec-value">99.99%</span>
             <h3 class="spec-title">Độ tin cậy SLA</h3>
             <p class="spec-desc">Hệ thống phân tán đa vùng bảo đảm dịch vụ luôn sẵn sàng phục vụ mọi lúc.</p>
           </div>
           <!-- Spec item 3 -->
-          <div class="spec-card animate-on-scroll">
+          <div class="spec-card animate-on-scroll" data-anim="flip-up" data-delay="3">
             <span class="spec-value">256-bit</span>
             <h3 class="spec-title">Mã hóa dữ liệu</h3>
             <p class="spec-desc">Bảo mật dữ liệu tuyệt đối với tiêu chuẩn AES-256 ở trạng thái nghỉ và đường truyền bảo mật SSL.</p>
           </div>
           <!-- Spec item 4 -->
-          <div class="spec-card animate-on-scroll">
+          <div class="spec-card animate-on-scroll" data-anim="flip-up" data-delay="4">
             <span class="spec-value">1,000+</span>
             <h3 class="spec-title">Tích hợp sẵn có</h3>
             <p class="spec-desc">Kết nối mượt mà với Slack, Notion, GitHub, Google Drive thông qua hệ thống khóa API an toàn.</p>
@@ -360,7 +369,7 @@
           <p class="section-subtitle">Chọn một câu lệnh bên dưới để xem cách Zenith AI tự động xử lý công việc.</p>
         </div>
 
-        <div class="simulator-container animate-on-scroll">
+        <div class="simulator-container animate-on-scroll" data-anim="scale-up">
           <div class="simulator-prompts">
             <button class="prompt-btn active" data-prompt="marketing" id="prompt-marketing">
               <span class="prompt-icon">📝</span>
@@ -480,7 +489,7 @@
     <!-- Pricing Section -->
     <section class="pricing-section" id="pricing">
       <div class="container">
-        <div class="section-header text-center">
+        <div class="section-header text-center animate-on-scroll" data-anim="fade-up">
           <h2 class="section-title">Gói dịch vụ linh hoạt</h2>
           <p class="section-subtitle">Bắt đầu miễn phí và nâng cấp khi bạn cần tự động hóa nâng cao.</p>
 
@@ -496,7 +505,7 @@
 
         <div class="pricing-grid">
           <!-- Pricing Card 1 -->
-          <div class="pricing-card animate-on-scroll">
+          <div class="pricing-card animate-on-scroll" data-anim="fade-left" data-delay="1">
             <div class="card-inner">
               <h3 class="plan-name">Cá nhân</h3>
               <p class="plan-desc">Hoàn hảo cho người mới bắt đầu tối ưu hóa năng suất.</p>
@@ -528,7 +537,7 @@
           </div>
 
           <!-- Pricing Card 2 (Featured) -->
-          <div class="pricing-card featured animate-on-scroll">
+          <div class="pricing-card featured animate-on-scroll" data-anim="scale-up" data-delay="2">
             <div class="popular-badge">Khuyên dùng</div>
             <div class="card-inner">
               <h3 class="plan-name">Chuyên nghiệp</h3>
@@ -565,7 +574,7 @@
           </div>
 
           <!-- Pricing Card 3 -->
-          <div class="pricing-card animate-on-scroll">
+          <div class="pricing-card animate-on-scroll" data-anim="fade-right" data-delay="3">
             <div class="card-inner">
               <h3 class="plan-name">Doanh nghiệp</h3>
               <p class="plan-desc">Các giải pháp tùy biến cho tổ chức cần tính bảo mật tối đa.</p>
@@ -933,6 +942,6 @@
   </div>
 
   <!-- App JS -->
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

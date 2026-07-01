@@ -76,20 +76,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   /* ==========================================================================
-     4. Intersection Observer (Scroll entrance animations)
+     4. Intersection Observer (Scroll entrance animations + Lazy Loading)
      ========================================================================== */
+  
+  // A. Lazy-load sections with skeleton placeholders
+  const lazySections = [
+    { skeletonId: 'features-skeleton', contentId: 'features-content' }
+  ];
+
+  const sectionLazyOptions = {
+    root: null,
+    rootMargin: '100px',
+    threshold: 0.05
+  };
+
+  const sectionLazyObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const sectionEl = entry.target;
+        const sectionId = sectionEl.getAttribute('id');
+
+        // Find matching lazy config
+        const config = lazySections.find(c => {
+          const skeleton = document.getElementById(c.skeletonId);
+          return skeleton && skeleton.closest('section') === sectionEl;
+        });
+
+        if (config) {
+          const skeleton = document.getElementById(config.skeletonId);
+          const content = document.getElementById(config.contentId);
+
+          if (skeleton && content && content.classList.contains('lazy-hidden')) {
+            // Show skeleton shimmer for 800ms, then reveal real content
+            setTimeout(() => {
+              skeleton.classList.add('hidden');
+              content.classList.remove('lazy-hidden');
+            }, 800);
+          }
+        }
+
+        obs.unobserve(sectionEl);
+      }
+    });
+  }, sectionLazyOptions);
+
+  // Observe parent sections that contain skeletons
+  lazySections.forEach(config => {
+    const skeleton = document.getElementById(config.skeletonId);
+    if (skeleton) {
+      const parentSection = skeleton.closest('section');
+      if (parentSection) sectionLazyObserver.observe(parentSection);
+    }
+  });
+
+  // B. Scroll entrance animations for .animate-on-scroll elements
   const animatedElements = document.querySelectorAll('.animate-on-scroll');
   const observerOptions = {
-    root: null, // viewport
+    root: null,
     rootMargin: '0px',
-    threshold: 0.15 // trigger when 15% of element is visible
+    threshold: 0.12
   };
 
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('active');
-        // Once animated, we don't need to observe it anymore
         observer.unobserve(entry.target);
       }
     });
