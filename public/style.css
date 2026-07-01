@@ -511,6 +511,16 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   --text-primary: #f4f4f5;
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary); /* Áp đặt màu chữ sáng tĩnh kế thừa */
+}
+
+.visual-mockup h1,
+.visual-mockup h2,
+.visual-mockup h3,
+.visual-mockup h4,
+.visual-mockup h5,
+.visual-mockup h6 {
+  color: var(--text-primary);
 }
 
 .visual-mockup:hover {
@@ -681,6 +691,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   --text-primary: #f4f4f5;
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary); /* Áp đặt màu chữ sáng tĩnh kế thừa */
 }
 
 .widget-1 {
