@@ -1749,6 +1749,7 @@ textarea.form-input {
   transform: translateX(-60px);
 }
 .animate-on-scroll[data-anim="fade-left"].active {
+  opacity: 1;
   transform: translateX(0);
 }
 
@@ -1758,6 +1759,7 @@ textarea.form-input {
   transform: translateX(60px);
 }
 .animate-on-scroll[data-anim="fade-right"].active {
+  opacity: 1;
   transform: translateX(0);
 }
 
@@ -1767,6 +1769,7 @@ textarea.form-input {
   transform: scale(0.85);
 }
 .animate-on-scroll[data-anim="scale-up"].active {
+  opacity: 1;
   transform: scale(1);
 }
 
@@ -1776,6 +1779,7 @@ textarea.form-input {
   transform: perspective(800px) rotateX(15deg) translateY(30px);
 }
 .animate-on-scroll[data-anim="flip-up"].active {
+  opacity: 1;
   transform: perspective(800px) rotateX(0) translateY(0);
 }
 
