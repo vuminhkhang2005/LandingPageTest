@@ -106,11 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const skeleton = document.getElementById(config.skeletonId);
           const content = document.getElementById(config.contentId);
 
-          if (skeleton && content && content.classList.contains('lazy-hidden')) {
-            // Show skeleton shimmer for 800ms, then reveal real content
+          if (skeleton && content && content.style.opacity === '0') {
+            // Show skeleton shimmer for 800ms, then fade in real content
             setTimeout(() => {
               skeleton.classList.add('hidden');
-              content.classList.remove('lazy-hidden');
+              content.style.opacity = '1';
             }, 800);
           }
         }
