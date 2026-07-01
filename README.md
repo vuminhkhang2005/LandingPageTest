@@ -28,9 +28,11 @@ Dự án được xây dựng hoàn toàn bằng **HTML5**, **Vanilla CSS (CSS C
 
 ```text
 LandingPageTest/
-├── index.html       # Cấu trúc HTML chính & Thẻ SEO Meta
-├── style.css        # Hệ thống thiết kế (Design System), HSL Colors & Layout Styles
-├── app.js           # Xử lý logic giao diện, hiệu ứng tương tác & mô phỏng
+├── public/          # Thư mục chứa tài nguyên tĩnh public
+│   ├── index.html   # Cấu trúc HTML chính & Thẻ SEO Meta
+│   ├── style.css    # Hệ thống thiết kế (Design System), HSL Colors & Layout Styles
+│   └── app.js       # Xử lý logic giao diện, hiệu ứng tương tác & mô phỏng
+├── wrangler.jsonc   # Cấu hình deploy Cloudflare Pages/Workers
 └── README.md        # Tài liệu hướng dẫn dự án
 ```
 

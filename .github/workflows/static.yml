@@ -37,8 +37,8 @@ jobs:
       - name: Tải lên tài nguyên (Upload Artifact)
         uses: actions/upload-pages-artifact@v3
         with:
-          # Thư mục gốc chứa index.html
-          path: '.'
+          # Thư mục chứa index.html
+          path: './public'
 
       - name: Triển khai lên GitHub Pages
         id: deployment
