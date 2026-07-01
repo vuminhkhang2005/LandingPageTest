@@ -398,6 +398,13 @@
               </div>
             </div>
             <div class="screen-body">
+              <!-- Skeleton Loader for simulator -->
+              <div id="simulator-skeleton" class="simulator-skeleton hidden">
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line long"></div>
+                <div class="skeleton-line medium"></div>
+              </div>
               <div class="terminal-chat" id="terminal-chat-content">
                 <!-- Live content loaded here by JavaScript -->
               </div>
@@ -792,7 +799,140 @@
     </div>
   </footer>
 
+  <!-- User Behavior Tracker Toast Container -->
+  <div id="tracker-toast-container" class="tracker-toast-container"></div>
+
+  <!-- Plan Cart Side Drawer -->
+  <div id="cart-drawer" class="cart-drawer">
+    <div class="cart-drawer-overlay" id="cart-overlay"></div>
+    <div class="cart-drawer-content">
+      <div class="cart-drawer-header">
+        <h3>🛒 Giỏ Hàng Gói Dịch Vụ</h3>
+        <button class="cart-close-btn" id="cart-close-btn">&times;</button>
+      </div>
+      <div class="cart-drawer-body">
+        <!-- Plan details -->
+        <div class="cart-plan-info">
+          <h4 id="cart-plan-name">Gói dịch vụ</h4>
+          <div class="cart-plan-price">
+            <span id="cart-plan-price-val">$0</span><span class="period">/tháng</span>
+          </div>
+        </div>
+
+        <!-- Add-ons Selection -->
+        <div class="cart-addons-section">
+          <h5>Chọn thêm tiện ích (Add-ons):</h5>
+          <div class="addon-option">
+            <input type="checkbox" id="addon-agents" class="addon-checkbox" data-price="5">
+            <label for="addon-agents">
+              <span class="addon-name">Thêm 1 AI Agent (+ $5/tháng)</span>
+            </label>
+          </div>
+          <div class="addon-option">
+            <input type="checkbox" id="addon-storage" class="addon-checkbox" data-price="10">
+            <label for="addon-storage">
+              <span class="addon-name">Thêm 10GB lưu trữ đám mây (+ $10/tháng)</span>
+            </label>
+          </div>
+          <div class="addon-option">
+            <input type="checkbox" id="addon-support" class="addon-checkbox" data-price="15">
+            <label for="addon-support">
+              <span class="addon-name">Hỗ trợ kỹ thuật ưu tiên 24/7 (+ $15/tháng)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Cart Total -->
+        <div class="cart-total-section">
+          <div class="total-row">
+            <span>Tạm tính:</span>
+            <span id="cart-subtotal">$0</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Tổng cộng:</span>
+            <span id="cart-total">$0/tháng</span>
+          </div>
+        </div>
+
+        <!-- Favorites & Action buttons -->
+        <div class="cart-actions">
+          <button class="btn btn-outline btn-full" id="btn-favorite-plan">
+            <span class="heart-icon">🤍</span> Lưu gói yêu thích
+          </button>
+          <button class="btn btn-primary btn-full" id="btn-checkout-plan">
+            Tiến hành đăng ký 🚀
+          </button>
+        </div>
+
+        <!-- Recently Viewed -->
+        <div class="cart-history-section">
+          <h5>Gói đã xem gần đây:</h5>
+          <ul id="cart-history-list" class="cart-items-list">
+            <!-- Dynamically loaded -->
+          </ul>
+        </div>
+
+        <!-- Favorites List -->
+        <div class="cart-favorites-section">
+          <h5>Gói yêu thích của bạn:</h5>
+          <ul id="cart-favorites-list" class="cart-items-list">
+            <!-- Dynamically loaded -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Chatbot Widget -->
+  <div class="chatbot-container" id="chatbot-container">
+    <button class="chatbot-toggle-btn" id="chatbot-toggle-btn" aria-label="Open chat assistant">
+      <!-- Chat icon SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chat-icon">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <!-- Close icon SVG -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="close-icon hidden">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      <span class="chatbot-unread-dot" id="chatbot-unread"></span>
+    </button>
+    
+    <div class="chatbot-window" id="chatbot-window">
+      <div class="chatbot-header">
+        <div class="chatbot-brand">
+          <span class="chatbot-avatar-dot"></span>
+          <div>
+            <h4>Zenith AI Assistant</h4>
+            <span class="status">Đang trực tuyến</span>
+          </div>
+        </div>
+      </div>
+      <div class="chatbot-messages" id="chatbot-messages">
+        <div class="chat-msg bot">
+          <div class="msg-bubble">
+            Xin chào! Tôi là trợ lý ảo Zenith AI. Bạn cần tư vấn thông tin gì về sản phẩm?
+          </div>
+        </div>
+        <div class="chat-quick-options">
+          <button class="quick-opt-btn" data-question="Zenith AI là gì?">🤖 Zenith AI là gì?</button>
+          <button class="quick-opt-btn" data-question="Bảng giá các gói thế nào?">💰 Giá các gói thế nào?</button>
+          <button class="quick-opt-btn" data-question="Dữ liệu có được bảo mật không?">🔒 Có bảo mật không?</button>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <input type="text" id="chatbot-input" placeholder="Nhập câu hỏi của bạn...">
+        <button id="chatbot-send-btn" aria-label="Send message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="send-icon">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- App JS -->
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

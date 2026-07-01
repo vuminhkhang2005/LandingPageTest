@@ -265,31 +265,44 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
     if (!data) return;
 
     agentNameEl.textContent = data.agentName;
-    simulatedUserInput.textContent = '';
-    terminalChat.innerHTML = '';
-
-    // Step 1: Type the prompt character by character
-    const userText = data.userInput;
-    let charIndex = 0;
+    simulatedUserInput.textContent = 'Khởi chạy Agent...';
     
-    // Create cursor in text container
-    const cursor = document.createElement('span');
-    cursor.className = 'typing-cursor';
-    simulatedUserInput.appendChild(cursor);
+    const skeletonEl = document.getElementById('simulator-skeleton');
+    const chatEl = document.getElementById('terminal-chat-content');
+    
+    // Hiển thị Skeleton Loading, ẩn khung chat
+    skeletonEl.classList.remove('hidden');
+    chatEl.classList.add('hidden');
+    simulatedUserInput.classList.add('text-muted');
 
-    const typeChar = () => {
-      if (charIndex < userText.length) {
-        cursor.insertAdjacentText('beforebegin', userText.charAt(charIndex));
-        charIndex++;
-        activeTypingTimeout = setTimeout(typeChar, 30);
-      } else {
-        // Typing finished, remove blinking cursor from input, start showing logs
-        cursor.remove();
-        playTerminalLogs(data.logs);
-      }
-    };
+    // Giả lập độ trễ hệ thống 1 giây
+    setTimeout(() => {
+      skeletonEl.classList.add('hidden');
+      chatEl.classList.remove('hidden');
+      simulatedUserInput.textContent = '';
+      simulatedUserInput.classList.remove('text-muted');
 
-    activeTypingTimeout = setTimeout(typeChar, 300);
+      // Bắt đầu giả lập gõ chữ
+      const userText = data.userInput;
+      let charIndex = 0;
+      
+      const cursor = document.createElement('span');
+      cursor.className = 'typing-cursor';
+      simulatedUserInput.appendChild(cursor);
+
+      const typeChar = () => {
+        if (charIndex < userText.length) {
+          cursor.insertAdjacentText('beforebegin', userText.charAt(charIndex));
+          charIndex++;
+          activeTypingTimeout = setTimeout(typeChar, 30);
+        } else {
+          cursor.remove();
+          playTerminalLogs(data.logs);
+        }
+      };
+
+      typeChar();
+    }, 1000);
   };
 
   const playTerminalLogs = (logs) => {
@@ -382,6 +395,7 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
     // Simple validation checks
     const name = document.getElementById('contact-name').value.trim();
     const email = document.getElementById('contact-email').value.trim();
+    const interest = document.getElementById('contact-interest').value;
     const message = document.getElementById('contact-message').value.trim();
 
     if (!name || !email || !message) {
@@ -392,23 +406,474 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
 
     // Toggle button state to loading
     submitBtn.disabled = true;
-    submitBtnText.textContent = 'Đang gửi đăng ký...';
+    submitBtnText.textContent = 'Đang gửi qua Webhook...';
     submitBtnSpinner.classList.remove('hidden');
 
-    // Simulate Server Post request (API delay)
-    setTimeout(() => {
-      // Revert button status
+    // Real webhook integration (POST to httpbin.org/post)
+    const payload = {
+      name: name,
+      email: email,
+      interest: interest,
+      message: message,
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+
+    fetch('https://httpbin.org/post', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Mạng không phản hồi');
+      return response.json();
+    })
+    .then(data => {
+      // Success
       submitBtn.disabled = false;
       submitBtnText.textContent = 'Đăng ký thông tin';
       submitBtnSpinner.classList.add('hidden');
 
-      // Success
       statusMsg.className = 'form-status-msg success';
-      statusMsg.textContent = `Cảm ơn ${name}! Chúng tôi đã tiếp nhận thông tin đăng ký của bạn. Mã kích hoạt dùng thử 14 ngày đã được gửi vào hòm thư ${email}.`;
+      statusMsg.textContent = `Cảm ơn ${name}! Dữ liệu đăng ký đã gửi thành công qua Webhook thực tế (httpbin.org). Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
       
+      showTrackerToast(`[Webhook] Gửi webhook thành công! Phản hồi 200 OK.`);
+
+      // Save submission to local storage (Backend database simulation)
+      let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
+      submissions.push(payload);
+      localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
+
       // Reset form fields
       contactForm.reset();
-    }, 2000);
+    })
+    .catch(error => {
+      // Error handling
+      submitBtn.disabled = false;
+      submitBtnText.textContent = 'Đăng ký thông tin';
+      submitBtnSpinner.classList.add('hidden');
+
+      statusMsg.className = 'form-status-msg error';
+      statusMsg.textContent = 'Gửi qua Webhook thất bại. Nhưng thông tin đăng ký của bạn đã được ghi lại cục bộ.';
+      
+      showTrackerToast(`[Webhook] Webhook thất bại: ${error.message}`);
+    });
   });
+
+
+  /* ==========================================================================
+     9. User Behavior Tracker (Toasts)
+     ========================================================================== */
+  const toastContainer = document.getElementById('tracker-toast-container');
+
+  const showTrackerToast = (message) => {
+    if (!toastContainer) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'tracker-toast';
+    toast.textContent = message;
+    
+    toastContainer.appendChild(toast);
+    
+    // Tự động xóa sau 3.5 giây
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 400);
+    }, 3500);
+  };
+
+  // Theo dõi hành vi cuộn chuột (Scroll) qua các Section
+  const sectionTrackerOptions = {
+    root: null,
+    threshold: 0.4
+  };
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        let sectionName = '';
+        if (id === 'hero') sectionName = 'Màn hình chính (Hero)';
+        else if (id === 'features') sectionName = 'Tính năng nổi bật';
+        else if (id === 'specs') sectionName = 'Thông số kỹ thuật';
+        else if (id === 'simulator') sectionName = 'AI Simulator Demo';
+        else if (id === 'pricing') sectionName = 'Bảng giá dịch vụ';
+        else if (id === 'faq') sectionName = 'Hỏi đáp (FAQ)';
+        else if (id === 'contact') sectionName = 'Form đăng ký & Liên hệ';
+        
+        if (sectionName) {
+          showTrackerToast(`[Hành vi] Đang cuộn xem: ${sectionName}`);
+        }
+      }
+    });
+  }, sectionTrackerOptions);
+
+  const sectionsToTrack = document.querySelectorAll('section[id]');
+  sectionsToTrack.forEach(sec => sectionObserver.observe(sec));
+
+  // Theo dõi hành vi nhấn chuột (Click)
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('a, button, .prompt-btn, .quick-opt-btn, .addon-option');
+    if (!target) return;
+    
+    let label = target.textContent.trim().substring(0, 30);
+    if (target.getAttribute('id') === 'theme-toggle-btn') {
+      label = 'Thay đổi giao diện (Light/Dark Mode)';
+    } else if (target.closest('#chatbot-toggle-btn')) {
+      label = 'Mở/đóng Trợ lý Chatbot';
+    } else if (target.closest('#cart-close-btn') || target.closest('#cart-overlay')) {
+      label = 'Đóng giỏ hàng gói dịch vụ';
+    }
+    
+    if (label) {
+      showTrackerToast(`[Hành vi] Đã click: "${label}"`);
+    }
+  });
+
+
+  /* ==========================================================================
+     10. Plan Cart Drawer (Mini E-commerce)
+     ========================================================================== */
+  const cartDrawer = document.getElementById('cart-drawer');
+  const cartCloseBtn = document.getElementById('cart-close-btn');
+  const cartOverlay = document.getElementById('cart-overlay');
+  
+  const cartPlanNameEl = document.getElementById('cart-plan-name');
+  const cartPlanPriceValEl = document.getElementById('cart-plan-price-val');
+  const cartSubtotalEl = document.getElementById('cart-subtotal');
+  const cartTotalEl = document.getElementById('cart-total');
+  
+  const addonCheckboxes = document.querySelectorAll('.addon-checkbox');
+  const btnFavoritePlan = document.getElementById('btn-favorite-plan');
+  const btnCheckoutPlan = document.getElementById('btn-checkout-plan');
+  const cartHistoryList = document.getElementById('cart-history-list');
+  const cartFavoritesList = document.getElementById('cart-favorites-list');
+
+  let currentBasePrice = 0;
+  let currentPlanName = '';
+  let currentBillingPeriod = '/tháng';
+
+  const updateCartTotals = () => {
+    let subtotal = currentBasePrice;
+    let addonsTotal = 0;
+    
+    addonCheckboxes.forEach(chk => {
+      if (chk.checked) {
+        addonsTotal += parseFloat(chk.getAttribute('data-price'));
+      }
+    });
+    
+    const total = subtotal + addonsTotal;
+    
+    cartSubtotalEl.textContent = `$${subtotal}`;
+    cartTotalEl.textContent = `$${total}${currentBillingPeriod}`;
+  };
+
+  const openCartDrawer = (planName, basePrice, isYearly) => {
+    currentPlanName = planName;
+    currentBasePrice = basePrice;
+    currentBillingPeriod = isYearly ? '/năm' : '/tháng';
+    
+    cartPlanNameEl.textContent = `Gói: ${planName} (${isYearly ? 'Thanh toán năm' : 'Thanh toán tháng'})`;
+    cartPlanPriceValEl.textContent = `$${basePrice}`;
+    
+    addonCheckboxes.forEach(chk => chk.checked = false);
+    
+    updateCartTotals();
+    trackPlanViewed(planName);
+    
+    cartDrawer.classList.add('active');
+    updateFavoriteBtnState();
+  };
+
+  const closeCartDrawer = () => {
+    cartDrawer.classList.remove('active');
+  };
+
+  cartCloseBtn.addEventListener('click', closeCartDrawer);
+  cartOverlay.addEventListener('click', closeCartDrawer);
+  
+  addonCheckboxes.forEach(chk => {
+    chk.addEventListener('change', updateCartTotals);
+  });
+
+  const trackPlanViewed = (planName) => {
+    let viewed = JSON.parse(localStorage.getItem('zenith-viewed-plans') || '[]');
+    viewed = viewed.filter(p => p !== planName);
+    viewed.unshift(planName);
+    if (viewed.length > 5) viewed.pop();
+    localStorage.setItem('zenith-viewed-plans', JSON.stringify(viewed));
+    renderHistory();
+  };
+
+  const renderHistory = () => {
+    const viewed = JSON.parse(localStorage.getItem('zenith-viewed-plans') || '[]');
+    cartHistoryList.innerHTML = '';
+    
+    if (viewed.length === 0) {
+      cartHistoryList.innerHTML = '<li class="text-xs text-muted" style="padding: 8px;">Chưa xem gói nào</li>';
+      return;
+    }
+    
+    viewed.forEach(plan => {
+      const li = document.createElement('li');
+      li.className = 'cart-item';
+      li.innerHTML = `
+        <span class="cart-item-title">${plan}</span>
+        <span class="cart-item-action" data-plan="${plan}">Xem lại</span>
+      `;
+      cartHistoryList.appendChild(li);
+    });
+  };
+
+  const toggleFavorite = () => {
+    let favorites = JSON.parse(localStorage.getItem('zenith-favorite-plans') || '[]');
+    const isFav = favorites.includes(currentPlanName);
+    
+    if (isFav) {
+      favorites = favorites.filter(p => p !== currentPlanName);
+      showTrackerToast(`[Yêu thích] Đã xóa: Gói ${currentPlanName}`);
+    } else {
+      favorites.push(currentPlanName);
+      showTrackerToast(`[Yêu thích] Đã thêm: Gói ${currentPlanName}`);
+    }
+    
+    localStorage.setItem('zenith-favorite-plans', JSON.stringify(favorites));
+    updateFavoriteBtnState();
+    renderFavorites();
+  };
+
+  const updateFavoriteBtnState = () => {
+    const favorites = JSON.parse(localStorage.getItem('zenith-favorite-plans') || '[]');
+    const isFav = favorites.includes(currentPlanName);
+    const heart = btnFavoritePlan.querySelector('.heart-icon');
+    
+    if (isFav) {
+      heart.textContent = '❤️';
+      btnFavoritePlan.classList.add('active');
+    } else {
+      heart.textContent = '🤍';
+      btnFavoritePlan.classList.remove('active');
+    }
+  };
+
+  const renderFavorites = () => {
+    const favorites = JSON.parse(localStorage.getItem('zenith-favorite-plans') || '[]');
+    cartFavoritesList.innerHTML = '';
+    
+    if (favorites.length === 0) {
+      cartFavoritesList.innerHTML = '<li class="text-xs text-muted" style="padding: 8px;">Chưa có gói yêu thích</li>';
+      return;
+    }
+    
+    favorites.forEach(plan => {
+      const li = document.createElement('li');
+      li.className = 'cart-item';
+      li.innerHTML = `
+        <span class="cart-item-title">${plan}</span>
+        <span class="cart-item-action" data-plan="${plan}">Xem</span>
+      `;
+      cartFavoritesList.appendChild(li);
+    });
+  };
+
+  btnFavoritePlan.addEventListener('click', toggleFavorite);
+
+  const handleItemClick = (e) => {
+    if (!e.target.classList.contains('cart-item-action')) return;
+    const plan = e.target.getAttribute('data-plan');
+    
+    let price = 19;
+    if (plan === 'Cá nhân') price = 0;
+    else if (plan === 'Doanh nghiệp') price = 49;
+    
+    const isYearly = document.getElementById('billing-switch').classList.contains('active');
+    if (isYearly) {
+      if (plan === 'Chuyên nghiệp') price = 15;
+      else if (plan === 'Doanh nghiệp') price = 39;
+    }
+    
+    openCartDrawer(plan, price, isYearly);
+  };
+
+  cartHistoryList.addEventListener('click', handleItemClick);
+  cartFavoritesList.addEventListener('click', handleItemClick);
+
+  // Gắn sự kiện chặn nút CTA bảng giá và thay thế bằng mở Giỏ Hàng
+  const pricingCards = document.querySelectorAll('.pricing-card');
+  pricingCards.forEach(card => {
+    const planName = card.querySelector('.plan-name').textContent.trim();
+    const btn = card.querySelector('.btn');
+    
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const isYearly = document.getElementById('billing-switch').classList.contains('active');
+      let price = 19;
+      if (planName === 'Cá nhân') price = 0;
+      else if (planName === 'Doanh nghiệp') price = 49;
+      
+      if (isYearly) {
+        if (planName === 'Chuyên nghiệp') price = 15;
+        else if (planName === 'Doanh nghiệp') price = 39;
+      }
+      
+      openCartDrawer(planName, price, isYearly);
+    });
+    
+    // Di chuột xem gói (Micro-interaction & Behavior tracking)
+    card.addEventListener('mouseenter', () => {
+      showTrackerToast(`[Xem] Tìm hiểu gói: Gói ${planName}`);
+    });
+  });
+
+  // Tiến hành checkout gói (đẩy dữ liệu vào Form Đăng Ký)
+  btnCheckoutPlan.addEventListener('click', () => {
+    const contactInterestSelect = document.getElementById('contact-interest');
+    const contactMessageTextarea = document.getElementById('contact-message');
+    
+    if (currentPlanName === 'Cá nhân') {
+      contactInterestSelect.value = 'pro';
+    } else if (currentPlanName === 'Doanh nghiệp') {
+      contactInterestSelect.value = 'enterprise';
+    } else {
+      contactInterestSelect.value = 'pro';
+    }
+    
+    let addonsList = [];
+    addonCheckboxes.forEach(chk => {
+      if (chk.checked) {
+        addonsList.push(chk.nextElementSibling.querySelector('.addon-name').textContent);
+      }
+    });
+    
+    const totalText = cartTotalEl.textContent;
+    contactMessageTextarea.value = `Tôi muốn đăng ký Gói: ${currentPlanName} (${totalText}).\nCác tiện ích đi kèm: ${addonsList.length > 0 ? addonsList.join(', ') : 'Không có'}.\nVui lòng liên hệ lại tư vấn!`;
+    
+    closeCartDrawer();
+    
+    // Cuộn mượt đến phần liên hệ
+    const contactSection = document.getElementById('contact');
+    contactSection.scrollIntoView({ behavior: 'smooth' });
+    
+    showTrackerToast(`[Giỏ hàng] Đã nhập thông tin giỏ hàng vào Form Đăng Ký!`);
+  });
+
+
+  /* ==========================================================================
+     11. Chatbot Widget Logic
+     ========================================================================== */
+  const chatbotContainer = document.getElementById('chatbot-container');
+  const chatbotToggleBtn = document.getElementById('chatbot-toggle-btn');
+  const chatbotMessages = document.getElementById('chatbot-messages');
+  const chatbotInput = document.getElementById('chatbot-input');
+  const chatbotSendBtn = document.getElementById('chatbot-send-btn');
+  const chatbotUnread = document.getElementById('chatbot-unread');
+  
+  // Hiển thị chấm đỏ tin nhắn sau 4 giây (Micro-interaction)
+  setTimeout(() => {
+    if (!chatbotContainer.classList.contains('active')) {
+      chatbotUnread.style.display = 'block';
+      showTrackerToast(`[Trợ lý ảo] Bạn có 1 tin nhắn mới từ Zenith AI Assistant!`);
+    }
+  }, 4000);
+
+  chatbotToggleBtn.addEventListener('click', () => {
+    const isActive = chatbotContainer.classList.toggle('active');
+    const chatIcon = chatbotToggleBtn.querySelector('.chat-icon');
+    const closeIcon = chatbotToggleBtn.querySelector('.close-icon');
+    
+    if (isActive) {
+      chatIcon.classList.add('hidden');
+      closeIcon.classList.remove('hidden');
+      chatbotUnread.style.display = 'none';
+      chatbotInput.focus();
+    } else {
+      chatIcon.classList.remove('hidden');
+      closeIcon.classList.add('hidden');
+    }
+  });
+
+  const appendChatMessage = (text, sender) => {
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${sender}`;
+    msg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+    chatbotMessages.appendChild(msg);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+  };
+
+  const showBotTypingIndicator = () => {
+    const indicator = document.createElement('div');
+    indicator.className = 'chat-msg bot typing-msg';
+    indicator.innerHTML = `
+      <div class="msg-bubble">
+        <div class="typing-indicator">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+    `;
+    chatbotMessages.appendChild(indicator);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    return indicator;
+  };
+
+  const handleBotResponse = (userText) => {
+    const typingIndicator = showBotTypingIndicator();
+    
+    let answer = "Tôi chưa hiểu câu hỏi của bạn. Bạn vui lòng chọn một trong các câu hỏi gợi ý bên dưới hoặc liên hệ contact@zenithai.io để nhận hỗ trợ tốt nhất nhé!";
+    const textLower = userText.toLowerCase();
+    
+    if (textLower.includes('là gì') || textLower.includes('zenith')) {
+      answer = "Zenith AI là một không gian làm việc thông minh tích hợp AI Agent tự vận hành, hỗ trợ tổng hợp thông tin, viết code, nghiên cứu và quản lý dự án hiệu quả gấp 10 lần.";
+    } else if (textLower.includes('giá') || textLower.includes('bảng giá') || textLower.includes('pricing') || textLower.includes('gói')) {
+      answer = "Chúng tôi cung cấp gói Cá nhân ($0), gói Chuyên nghiệp ($19/tháng hoặc $15/tháng khi thanh toán theo năm) và gói Doanh nghiệp ($49/tháng). Bạn có thể đăng ký dùng thử gói Pro miễn phí 14 ngày!";
+    } else if (textLower.includes('bảo mật') || textLower.includes('an toàn') || textLower.includes('security')) {
+      answer = "Zenith AI bảo mật dữ liệu tuyệt đối với tiêu chuẩn mã hóa AES-256 ở trạng thái nghỉ và đường truyền bảo mật SSL. Gói Doanh nghiệp hỗ trợ cài đặt On-Premise riêng biệt.";
+    } else if (textLower.includes('xin chào') || textLower.includes('hello') || textLower.includes('chào')) {
+      answer = "Xin chào! Rất vui được hỗ trợ bạn. Bạn muốn tìm hiểu thông tin nào về sản phẩm Zenith AI?";
+    }
+    
+    setTimeout(() => {
+      typingIndicator.remove();
+      appendChatMessage(answer, 'bot');
+    }, 1200);
+  };
+
+  const sendMessage = () => {
+    const text = chatbotInput.value.trim();
+    if (!text) return;
+    
+    appendChatMessage(text, 'user');
+    chatbotInput.value = '';
+    
+    handleBotResponse(text);
+  };
+
+  chatbotSendBtn.addEventListener('click', sendMessage);
+  chatbotInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Xử lý click câu hỏi nhanh
+  chatbotMessages.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quick-opt-btn');
+    if (!btn) return;
+    
+    const question = btn.getAttribute('data-question');
+    appendChatMessage(question, 'user');
+    btn.parentElement.remove();
+    
+    handleBotResponse(question);
+  });
+
+  // Khởi tạo hiển thị dữ liệu lịch sử giỏ hàng
+  renderHistory();
+  renderFavorites();
 
 });
