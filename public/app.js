@@ -106,11 +106,19 @@ document.addEventListener('DOMContentLoaded', () => {
           const skeleton = document.getElementById(config.skeletonId);
           const content = document.getElementById(config.contentId);
 
-          if (skeleton && content && content.style.opacity === '0') {
-            // Show skeleton shimmer for 800ms, then fade in real content
+          if (skeleton && content) {
+            // Show skeleton shimmer for 800ms, then reveal real content
             setTimeout(() => {
-              skeleton.classList.add('hidden');
-              content.style.opacity = '1';
+              skeleton.style.display = 'none';
+              content.style.display = 'grid';
+              
+              // Force reflow and transition opacity
+              setTimeout(() => {
+                content.style.opacity = '1';
+                // Trigger inner entrance animations
+                const innerAnims = content.querySelectorAll('.animate-on-scroll');
+                innerAnims.forEach(el => el.classList.add('active'));
+              }, 20);
             }, 800);
           }
         }
