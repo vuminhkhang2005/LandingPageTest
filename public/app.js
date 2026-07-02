@@ -1144,6 +1144,68 @@ Giải phóng 90% thời gian xử lý các tác vụ lặp đi lặp lại nh�
     });
   }
 
+  /* ==========================================================================
+     Bonus 4: License Key Generator (Matrix Effect)
+     ========================================================================== */
+  const generateKeyBtn = document.getElementById('generate-key-btn');
+  const keyDisplayBox = document.getElementById('key-display-box');
+  const keyTextEl = document.getElementById('key-text');
+  
+  if (generateKeyBtn && keyDisplayBox && keyTextEl) {
+    let isGenerating = false;
+    
+    generateKeyBtn.addEventListener('click', () => {
+      if (isGenerating) return;
+      isGenerating = true;
+      
+      generateKeyBtn.disabled = true;
+      generateKeyBtn.textContent = 'Đang tạo...';
+      keyDisplayBox.classList.add('generating');
+      showTrackerToast('[Bonus] Khởi chạy bộ giải mã Licence Key...');
+      
+      // Chạy hiệu ứng Matrix nhiễu chữ ngẫu nhiên
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let scrambleInterval = setInterval(() => {
+        let randPart1 = '';
+        let randPart2 = '';
+        for (let i = 0; i < 4; i++) {
+          randPart1 += chars.charAt(Math.floor(Math.random() * chars.length));
+          randPart2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        keyTextEl.textContent = `ZPRO-${randPart1}-${randPart2}`;
+      }, 50);
+      
+      // Dừng lại sau 1.2 giây và hiển thị key thực sự
+      setTimeout(() => {
+        clearInterval(scrambleInterval);
+        
+        // Tạo key ngẫu nhiên dạng ZPRO-XXXX-XXXX
+        let finalPart1 = '';
+        let finalPart2 = '';
+        for (let i = 0; i < 4; i++) {
+          finalPart1 += chars.charAt(Math.floor(Math.random() * chars.length));
+          finalPart2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        const finalKey = `ZPRO-${finalPart1}-${finalPart2}`;
+        keyTextEl.textContent = finalKey;
+        keyDisplayBox.classList.remove('generating');
+        
+        // Hiệu ứng nháy xanh lục báo thành công
+        keyTextEl.style.color = 'var(--accent-green)';
+        setTimeout(() => {
+          keyTextEl.style.color = '';
+        }, 800);
+        
+        generateKeyBtn.disabled = false;
+        generateKeyBtn.textContent = 'Tạo Mã';
+        isGenerating = false;
+        
+        showTrackerToast(`[Bonus] Tạo thành công Licence Key Pro dùng thử: ${finalKey}`);
+      }, 1200);
+    });
+  }
+
   // Khởi tạo hiển thị dữ liệu lịch sử giỏ hàng
   renderHistory();
   renderFavorites();
