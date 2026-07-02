@@ -775,6 +775,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   letter-spacing: 0.08em;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 2.5rem;
   display: inline-block;
