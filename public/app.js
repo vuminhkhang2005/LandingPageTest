@@ -982,6 +982,24 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
     handleBotResponse(question);
   });
 
+  /* ==========================================================================
+     Bonus 1: Mouse Spotlight Glow Effect
+     ========================================================================== */
+  const glowCards = document.querySelectorAll('.feature-card, .spec-card, .pricing-card');
+  glowCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--mouse-x');
+      card.style.removeProperty('--mouse-y');
+    });
+  });
+
   // Khởi tạo hiển thị dữ liệu lịch sử giỏ hàng
   renderHistory();
   renderFavorites();
