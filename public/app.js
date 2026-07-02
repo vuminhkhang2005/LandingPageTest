@@ -487,14 +487,10 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       return;
     }
 
-    // Toggle button state to loading
+    // Toggle button state to loading for a tiny visual feedback (300ms)
     submitBtn.disabled = true;
-    submitBtnText.textContent = 'Đang gửi qua Webhook...';
+    submitBtnText.textContent = 'Đang xử lý...';
     submitBtnSpinner.classList.remove('hidden');
-
-    // Timeout controller (3.5 seconds)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
     const payload = {
       name: name,
@@ -505,82 +501,98 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       userAgent: navigator.userAgent
     };
 
+    // 1. Lưu cục bộ ngay lập tức (giả lập database)
+    let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
+    submissions.push(payload);
+    localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
+
+    // 2. Hiển thị thông báo thành công sau 300ms để tạo cảm giác phản hồi nhanh gọn
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtnText.textContent = 'Đăng ký thông tin';
+      submitBtnSpinner.classList.add('hidden');
+
+      statusMsg.className = 'form-status-msg success';
+      statusMsg.textContent = `Cảm ơn ${name}! Đăng ký của bạn đã được ghi nhận thành công. Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
+      
+      showTrackerToast(`[Đăng ký] Đã lưu thông tin đăng ký của ${name} thành công!`);
+
+      // Reset form fields
+      contactForm.reset();
+    }, 300);
+
+    // 3. Gửi webhook chạy ngầm dưới background (không làm xoay vòng giao diện)
     fetch('https://httpbin.org/post', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload),
-      signal: controller.signal
+      body: JSON.stringify(payload)
     })
     .then(response => {
-      clearTimeout(timeoutId);
-      if (!response.ok) throw new Error('Mạng không phản hồi');
-      return response.json();
-    })
-    .then(data => {
-      // Success
-      submitBtn.disabled = false;
-      submitBtnText.textContent = 'Đăng ký thông tin';
-      submitBtnSpinner.classList.add('hidden');
-
-      statusMsg.className = 'form-status-msg success';
-      statusMsg.textContent = `Cảm ơn ${name}! Dữ liệu đăng ký đã gửi thành công qua Webhook thực tế (httpbin.org). Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
-      
-      showTrackerToast(`[Webhook] Gửi webhook thành công! Phản hồi 200 OK.`);
-
-      // Save submission to local storage (Backend database simulation)
-      let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
-      submissions.push(payload);
-      localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
-
-      // Reset form fields
-      contactForm.reset();
+      if (response.ok) {
+        showTrackerToast(`[Webhook] Dữ liệu đã được đồng bộ qua Webhook thực tế (200 OK).`);
+      }
     })
     .catch(error => {
-      clearTimeout(timeoutId);
-
-      // Fallback thành công cục bộ nếu Webhook bị chặn/timeout
-      submitBtn.disabled = false;
-      submitBtnText.textContent = 'Đăng ký thông tin';
-      submitBtnSpinner.classList.add('hidden');
-
-      statusMsg.className = 'form-status-msg success';
-      statusMsg.textContent = `Cảm ơn ${name}! Đăng ký của bạn đã được ghi nhận cục bộ thành công (Webhook phản hồi chậm). Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
-      
-      showTrackerToast(`[Webhook] Webhook Offline/Timeout - Đã lưu cục bộ.`);
-
-      let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
-      submissions.push(payload);
-      localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
-
-      // Reset form fields
-      contactForm.reset();
+      console.warn('Webhook background sync failed:', error);
     });
   });
 
 
   /* ==========================================================================
-     9. User Behavior Tracker (Toasts)
+     9. User Behavior Tracker (Developer Debug Console Panel)
      ========================================================================== */
-  const toastContainer = document.getElementById('tracker-toast-container');
+  const debugPanel = document.getElementById('debug-panel');
+  const debugToggleBtn = document.getElementById('debug-toggle-btn');
+  const consoleLogs = document.getElementById('console-logs');
+  const consoleClearBtn = document.getElementById('console-clear-btn');
 
+  // Toggle bật/tắt bảng điều khiển Debug
+  if (debugToggleBtn && debugPanel) {
+    debugToggleBtn.addEventListener('click', () => {
+      debugPanel.classList.toggle('active');
+    });
+  }
+
+  // Nút xóa sạch logs trong console
+  if (consoleClearBtn && consoleLogs) {
+    consoleClearBtn.addEventListener('click', () => {
+      consoleLogs.innerHTML = '<div class="log-line system">[sys] Console cleared. Logs reset.</div>';
+    });
+  }
+
+  // Hàm ghi nhận log hành vi người dùng
   const showTrackerToast = (message) => {
-    if (!toastContainer) return;
-    
-    const toast = document.createElement('div');
-    toast.className = 'tracker-toast';
-    toast.textContent = message;
-    
-    toastContainer.appendChild(toast);
-    
-    // Tự động xóa sau 3.5 giây
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      setTimeout(() => {
-        toast.remove();
-      }, 400);
-    }, 3500);
+    if (!consoleLogs) return;
+
+    // Lấy thời gian hiện tại định dạng HH:MM:SS
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+
+    // Tạo phần tử log mới
+    const logLine = document.createElement('div');
+    logLine.className = 'log-line';
+
+    // Xác định màu sắc/loại log
+    if (message.includes('[Hành vi] Đang cuộn')) {
+      logLine.classList.add('scroll');
+    } else if (message.includes('[Hành vi] Đã click') || message.includes('[Yêu thích]') || message.includes('[Xem]') || message.includes('[Giỏ hàng]')) {
+      logLine.classList.add('click');
+    } else if (message.includes('[Đăng ký]') || message.includes('[Webhook]')) {
+      logLine.classList.add('form');
+    } else {
+      logLine.classList.add('system');
+    }
+
+    logLine.textContent = `[${timeStr}] ${message}`;
+    consoleLogs.appendChild(logLine);
+
+    // Tự động cuộn xuống dưới cùng
+    consoleLogs.scrollTop = consoleLogs.scrollHeight;
+
+    // Ghi nhận thêm ở F12 Developer Tool
+    console.log(`%c[ZENITH AI DEBUG] %c[${timeStr}] ${message}`, 'color: #8b5cf6; font-weight: bold;', 'color: inherit;');
   };
 
   // Theo dõi hành vi cuộn chuột (Scroll) qua các Section
@@ -616,6 +628,7 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
   document.addEventListener('click', (e) => {
     const target = e.target.closest('a, button, .prompt-btn, .quick-opt-btn, .addon-option');
     if (!target) return;
+    if (target.closest('#debug-toggle-btn') || target.closest('#console-clear-btn')) return; // Bỏ qua log tương tác console
     
     let label = target.textContent.trim().substring(0, 30);
     if (target.getAttribute('id') === 'theme-toggle-btn') {
