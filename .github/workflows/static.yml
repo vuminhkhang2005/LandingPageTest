@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - production/deploy  # Chạy deploy khi push vào các nhánh này
+      - deploy  # Chạy deploy khi push vào các nhánh này
 
   # Cho phép chạy thủ công từ tab Actions
   workflow_dispatch:
