@@ -336,6 +336,7 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
 
     agentNameEl.textContent = data.agentName;
     simulatedUserInput.textContent = 'Khởi chạy Agent...';
+    terminalChat.innerHTML = ''; // Dọn sạch nội dung terminal cũ
     
     const skeletonEl = document.getElementById('simulator-skeleton');
     const chatEl = document.getElementById('terminal-chat-content');
@@ -442,8 +443,20 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
     });
   });
 
-  // Start with default marketing simulation
-  runSimulation('marketing');
+  // Chỉ tự động chạy simulator khi cuộn tới phần này
+  const simulatorSection = document.getElementById('simulator');
+  if (simulatorSection) {
+    const simulatorObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          runSimulation('marketing');
+          obs.unobserve(simulatorSection); // Chỉ tự động chạy lần đầu tiên
+        }
+      });
+    }, { threshold: 0.15 });
+    
+    simulatorObserver.observe(simulatorSection);
+  }
 
 
   /* ==========================================================================
