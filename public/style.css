@@ -2679,6 +2679,7 @@ html[data-theme="light"] .chatbot-window {
   border-radius: var(--radius-md);
   font-size: 0.85rem;
   line-height: 1.4;
+  white-space: pre-wrap;
 }
 
 .chat-msg.bot .msg-bubble {
