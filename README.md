@@ -87,5 +87,3 @@ Vercel tự động nhận diện trang tĩnh HTML thuần rất tốt:
 2. Kết nối với GitHub và chọn repository `LandingPageTest`.
 3. Để trống mục **Build Command** và **Publish Directory** (để mặc định là thư mục gốc `.`).
 4. Nhấn **Deploy** để hoàn tất.
-
-//Git Integration Test
