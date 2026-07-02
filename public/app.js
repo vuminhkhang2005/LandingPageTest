@@ -336,6 +336,7 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
 
     agentNameEl.textContent = data.agentName;
     simulatedUserInput.textContent = 'Khởi chạy Agent...';
+    terminalChat.innerHTML = ''; // Dọn sạch nội dung terminal cũ
     
     const skeletonEl = document.getElementById('simulator-skeleton');
     const chatEl = document.getElementById('terminal-chat-content');
@@ -430,6 +431,8 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
   };
 
   // Add click events to prompt buttons
+  const simulatorCustomInput = document.getElementById('simulator-custom-input');
+
   promptButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       // Set active state
@@ -438,12 +441,130 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       activeBtn.classList.add('active');
 
       const promptKey = activeBtn.getAttribute('data-prompt');
-      runSimulation(promptKey);
+      
+      if (promptKey === 'custom') {
+        clearAllSimulations();
+        agentNameEl.textContent = 'Custom-Agent';
+        simulatedUserInput.style.display = 'none';
+        
+        if (simulatorCustomInput) {
+          simulatorCustomInput.style.display = 'inline-block';
+          simulatorCustomInput.value = '';
+          setTimeout(() => simulatorCustomInput.focus(), 50);
+        }
+        
+        terminalChat.innerHTML = '';
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.style.color = '#8b5cf6';
+        line.innerHTML = `<span class="terminal-prefix">[sys]</span> Chế độ Tự viết Prompt đã sẵn sàng. Hãy gõ bất kỳ yêu cầu nào ở dòng lệnh bên dưới (ví dụ: 'viết bài cafe', 'tối ưu code') rồi bấm Enter!`;
+        terminalChat.appendChild(line);
+      } else {
+        if (simulatorCustomInput) {
+          simulatorCustomInput.style.display = 'none';
+        }
+        simulatedUserInput.style.display = 'inline-block';
+        runSimulation(promptKey);
+      }
     });
   });
 
-  // Start with default marketing simulation
-  runSimulation('marketing');
+  // Xử lý khi nhấn Enter để chạy câu lệnh Custom
+  if (simulatorCustomInput) {
+    simulatorCustomInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const userPrompt = simulatorCustomInput.value.trim();
+        if (!userPrompt) return;
+
+        simulatorCustomInput.value = '';
+        terminalChat.innerHTML = ''; // Clear terminal
+
+        // Hiển thị câu lệnh của người dùng
+        const userLine = document.createElement('div');
+        userLine.className = 'terminal-line';
+        userLine.innerHTML = `<span class="terminal-prefix" style="color: #a855f7;">&gt;</span> <span class="terminal-output" style="color: #e2e8f0; font-weight: bold;">${userPrompt}</span>`;
+        terminalChat.appendChild(userLine);
+
+        // Hiển thị thông báo hệ thống bắt đầu chạy
+        const sysLine = document.createElement('div');
+        sysLine.className = 'terminal-line';
+        sysLine.style.color = '#a1a1aa';
+        sysLine.innerHTML = `<span class="terminal-prefix">[sys]</span> Đang biên dịch câu lệnh và phân tích ngữ cảnh không gian làm việc...`;
+        terminalChat.appendChild(sysLine);
+
+        // Phân tích từ khóa để trả về kết quả tương ứng
+        let agentName = 'ZenithAI-Agent';
+        let logs = [];
+        const textLower = userPrompt.toLowerCase();
+
+        if (textLower.includes('code') || textLower.includes('tối ưu') || textLower.includes('refactor') || textLower.includes('lập trình') || textLower.includes('hàm') || textLower.includes('sửa')) {
+          agentName = 'Coder-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: Coder-Agent v2.1...' },
+            { type: 'info', text: 'Đang quét phân tích cấu trúc cú pháp AST...' },
+            { type: 'code', text: `// KẾT QUẢ TỐI ƯU HÀM CHO CÂU LỆNH: "${userPrompt}"
+function findDuplicate(arr) {
+  const seen = new Set();
+  for (let num of arr) {
+    if (seen.has(num)) return num;
+    seen.add(num);
+  }
+  return null;
+}` },
+            { type: 'success', text: 'Đã hoàn tất! Hàm code được tối ưu hóa thành công sang độ phức tạp O(N).' }
+          ];
+        } else if (textLower.includes('viết') || textLower.includes('bài') || textLower.includes('quảng cáo') || textLower.includes('fb') || textLower.includes('facebook') || textLower.includes('marketing') || textLower.includes('sales')) {
+          agentName = 'Copywriter-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: Copywriter-Agent v2.0...' },
+            { type: 'info', text: 'Đang lên dàn bài và định hình văn phong quảng cáo thu hút...' },
+            { type: 'code', text: `✨ BÀI VIẾT QUẢNG CÁO TẠO THEO YÊU CẦU: "${userPrompt}" ✨
+
+🚀 Không gian làm việc thông minh thế hệ mới - Zenith AI!
+Giải phóng 90% thời gian xử lý các tác vụ lặp đi lặp lại nhờ trợ lý AI tự vận hành:
+- Tự viết code, tối ưu hàm hiệu suất cao.
+- Tự viết content quảng cáo & nghiên cứu đối thủ cạnh tranh.
+👉 Click nút dùng thử 14 ngày Pro miễn phí ngay!` },
+            { type: 'success', text: 'Tạo bài quảng cáo thành công và lưu vào thư mục output/custom-ad.txt.' }
+          ];
+        } else {
+          agentName = 'ZenithAI-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: ZenithAI-Agent...' },
+            { type: 'info', text: `Đang khởi chạy luồng tự động hóa cho yêu cầu: "${userPrompt}"...` },
+            { type: 'info', text: 'Đang kết xuất và tổng hợp kết quả...' },
+            { type: 'code', text: `[ZenithAI-Agent] ĐÃ NHẬN LỆNH: "${userPrompt}"
+- Tác vụ: Đã nhận diện và lưu vết lịch sử hệ thống.
+- Tiến độ: 100% hoàn thành.
+- Kết quả: Đã tự động hóa thành công.` },
+            { type: 'success', text: 'Tác vụ chạy thử nghiệm kết thúc tốt đẹp!' }
+          ];
+        }
+
+        agentNameEl.textContent = agentName;
+
+        // Chạy logs giả lập
+        setTimeout(() => {
+          playTerminalLogs(logs);
+        }, 1000);
+      }
+    });
+  }
+
+  // Chỉ tự động chạy simulator khi cuộn tới phần này
+  const simulatorSection = document.getElementById('simulator');
+  if (simulatorSection) {
+    const simulatorObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          runSimulation('marketing');
+          obs.unobserve(simulatorSection); // Chỉ tự động chạy lần đầu tiên
+        }
+      });
+    }, { threshold: 0.15 });
+    
+    simulatorObserver.observe(simulatorSection);
+  }
 
 
   /* ==========================================================================
@@ -474,14 +595,10 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       return;
     }
 
-    // Toggle button state to loading
+    // Toggle button state to loading for a tiny visual feedback (300ms)
     submitBtn.disabled = true;
-    submitBtnText.textContent = 'Đang gửi qua Webhook...';
+    submitBtnText.textContent = 'Đang xử lý...';
     submitBtnSpinner.classList.remove('hidden');
-
-    // Timeout controller (3.5 seconds)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
     const payload = {
       name: name,
@@ -492,82 +609,98 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       userAgent: navigator.userAgent
     };
 
+    // 1. Lưu cục bộ ngay lập tức (giả lập database)
+    let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
+    submissions.push(payload);
+    localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
+
+    // 2. Hiển thị thông báo thành công sau 300ms để tạo cảm giác phản hồi nhanh gọn
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtnText.textContent = 'Đăng ký thông tin';
+      submitBtnSpinner.classList.add('hidden');
+
+      statusMsg.className = 'form-status-msg success';
+      statusMsg.textContent = `Cảm ơn ${name}! Đăng ký của bạn đã được ghi nhận thành công. Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
+      
+      showTrackerToast(`[Đăng ký] Đã lưu thông tin đăng ký của ${name} thành công!`);
+
+      // Reset form fields
+      contactForm.reset();
+    }, 300);
+
+    // 3. Gửi webhook chạy ngầm dưới background (không làm xoay vòng giao diện)
     fetch('https://httpbin.org/post', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload),
-      signal: controller.signal
+      body: JSON.stringify(payload)
     })
     .then(response => {
-      clearTimeout(timeoutId);
-      if (!response.ok) throw new Error('Mạng không phản hồi');
-      return response.json();
-    })
-    .then(data => {
-      // Success
-      submitBtn.disabled = false;
-      submitBtnText.textContent = 'Đăng ký thông tin';
-      submitBtnSpinner.classList.add('hidden');
-
-      statusMsg.className = 'form-status-msg success';
-      statusMsg.textContent = `Cảm ơn ${name}! Dữ liệu đăng ký đã gửi thành công qua Webhook thực tế (httpbin.org). Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
-      
-      showTrackerToast(`[Webhook] Gửi webhook thành công! Phản hồi 200 OK.`);
-
-      // Save submission to local storage (Backend database simulation)
-      let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
-      submissions.push(payload);
-      localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
-
-      // Reset form fields
-      contactForm.reset();
+      if (response.ok) {
+        showTrackerToast(`[Webhook] Dữ liệu đã được đồng bộ qua Webhook thực tế (200 OK).`);
+      }
     })
     .catch(error => {
-      clearTimeout(timeoutId);
-
-      // Fallback thành công cục bộ nếu Webhook bị chặn/timeout
-      submitBtn.disabled = false;
-      submitBtnText.textContent = 'Đăng ký thông tin';
-      submitBtnSpinner.classList.add('hidden');
-
-      statusMsg.className = 'form-status-msg success';
-      statusMsg.textContent = `Cảm ơn ${name}! Đăng ký của bạn đã được ghi nhận cục bộ thành công (Webhook phản hồi chậm). Mã kích hoạt 14 ngày dùng thử Pro đã được gửi về email ${email}.`;
-      
-      showTrackerToast(`[Webhook] Webhook Offline/Timeout - Đã lưu cục bộ.`);
-
-      let submissions = JSON.parse(localStorage.getItem('zenith-submissions') || '[]');
-      submissions.push(payload);
-      localStorage.setItem('zenith-submissions', JSON.stringify(submissions));
-
-      // Reset form fields
-      contactForm.reset();
+      console.warn('Webhook background sync failed:', error);
     });
   });
 
 
   /* ==========================================================================
-     9. User Behavior Tracker (Toasts)
+     9. User Behavior Tracker (Developer Debug Console Panel)
      ========================================================================== */
-  const toastContainer = document.getElementById('tracker-toast-container');
+  const debugPanel = document.getElementById('debug-panel');
+  const debugToggleBtn = document.getElementById('debug-toggle-btn');
+  const consoleLogs = document.getElementById('console-logs');
+  const consoleClearBtn = document.getElementById('console-clear-btn');
 
+  // Toggle bật/tắt bảng điều khiển Debug
+  if (debugToggleBtn && debugPanel) {
+    debugToggleBtn.addEventListener('click', () => {
+      debugPanel.classList.toggle('active');
+    });
+  }
+
+  // Nút xóa sạch logs trong console
+  if (consoleClearBtn && consoleLogs) {
+    consoleClearBtn.addEventListener('click', () => {
+      consoleLogs.innerHTML = '<div class="log-line system">[sys] Console cleared. Logs reset.</div>';
+    });
+  }
+
+  // Hàm ghi nhận log hành vi người dùng
   const showTrackerToast = (message) => {
-    if (!toastContainer) return;
-    
-    const toast = document.createElement('div');
-    toast.className = 'tracker-toast';
-    toast.textContent = message;
-    
-    toastContainer.appendChild(toast);
-    
-    // Tự động xóa sau 3.5 giây
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      setTimeout(() => {
-        toast.remove();
-      }, 400);
-    }, 3500);
+    if (!consoleLogs) return;
+
+    // Lấy thời gian hiện tại định dạng HH:MM:SS
+    const now = new Date();
+    const timeStr = now.toTimeString().split(' ')[0];
+
+    // Tạo phần tử log mới
+    const logLine = document.createElement('div');
+    logLine.className = 'log-line';
+
+    // Xác định màu sắc/loại log
+    if (message.includes('[Hành vi] Đang cuộn')) {
+      logLine.classList.add('scroll');
+    } else if (message.includes('[Hành vi] Đã click') || message.includes('[Yêu thích]') || message.includes('[Xem]') || message.includes('[Giỏ hàng]')) {
+      logLine.classList.add('click');
+    } else if (message.includes('[Đăng ký]') || message.includes('[Webhook]')) {
+      logLine.classList.add('form');
+    } else {
+      logLine.classList.add('system');
+    }
+
+    logLine.textContent = `[${timeStr}] ${message}`;
+    consoleLogs.appendChild(logLine);
+
+    // Tự động cuộn xuống dưới cùng
+    consoleLogs.scrollTop = consoleLogs.scrollHeight;
+
+    // Ghi nhận thêm ở F12 Developer Tool
+    console.log(`%c[ZENITH AI DEBUG] %c[${timeStr}] ${message}`, 'color: #8b5cf6; font-weight: bold;', 'color: inherit;');
   };
 
   // Theo dõi hành vi cuộn chuột (Scroll) qua các Section
@@ -603,6 +736,7 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
   document.addEventListener('click', (e) => {
     const target = e.target.closest('a, button, .prompt-btn, .quick-opt-btn, .addon-option');
     if (!target) return;
+    if (target.closest('#debug-toggle-btn') || target.closest('#console-clear-btn')) return; // Bỏ qua log tương tác console
     
     let label = target.textContent.trim().substring(0, 30);
     if (target.getAttribute('id') === 'theme-toggle-btn') {
@@ -909,24 +1043,60 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
 
   const handleBotResponse = (userText) => {
     const typingIndicator = showBotTypingIndicator();
-    
-    let answer = "Tôi chưa hiểu câu hỏi của bạn. Bạn vui lòng chọn một trong các câu hỏi gợi ý bên dưới hoặc liên hệ contact@zenithai.io để nhận hỗ trợ tốt nhất nhé!";
-    const textLower = userText.toLowerCase();
-    
-    if (textLower.includes('là gì') || textLower.includes('zenith')) {
-      answer = "Zenith AI là một không gian làm việc thông minh tích hợp AI Agent tự vận hành, hỗ trợ tổng hợp thông tin, viết code, nghiên cứu và quản lý dự án hiệu quả gấp 10 lần.";
-    } else if (textLower.includes('giá') || textLower.includes('bảng giá') || textLower.includes('pricing') || textLower.includes('gói')) {
-      answer = "Chúng tôi cung cấp gói Cá nhân ($0), gói Chuyên nghiệp ($19/tháng hoặc $15/tháng khi thanh toán theo năm) và gói Doanh nghiệp ($49/tháng). Bạn có thể đăng ký dùng thử gói Pro miễn phí 14 ngày!";
-    } else if (textLower.includes('bảo mật') || textLower.includes('an toàn') || textLower.includes('security')) {
-      answer = "Zenith AI bảo mật dữ liệu tuyệt đối với tiêu chuẩn mã hóa AES-256 ở trạng thái nghỉ và đường truyền bảo mật SSL. Gói Doanh nghiệp hỗ trợ cài đặt On-Premise riêng biệt.";
-    } else if (textLower.includes('xin chào') || textLower.includes('hello') || textLower.includes('chào')) {
-      answer = "Xin chào! Rất vui được hỗ trợ bạn. Bạn muốn tìm hiểu thông tin nào về sản phẩm Zenith AI?";
+    const textLower = userText.toLowerCase().trim();
+    let answer = "";
+
+    // 1. Phản hồi chào hỏi thân thiện
+    if (textLower.match(/^(chào|xin chào|hello|hi|hey|ola|alo|halo|helo)/)) {
+      answer = "Xin chào! Rất vui được trò chuyện với bạn. Tôi là Zenith AI Assistant. Hôm nay tôi có thể giúp gì cho bạn trong việc tối ưu hóa hiệu suất làm việc?";
     }
-    
+    // 2. Phản hồi lời cảm ơn / khen ngợi
+    else if (textLower.match(/(cảm ơn|cám ơn|thank|tks|ok|tốt|hay|tuyệt|awesome|great)/)) {
+      const positiveReplies = [
+        "Rất vui vì đã giúp ích được cho bạn! Nếu bạn có bất kỳ câu hỏi nào khác về Zenith AI, cứ tự nhiên hỏi nhé. 😊",
+        "Dạ không có gì ạ! Bạn có muốn thử nghiệm tính năng tạo mã kích hoạt dùng thử bản Pro ngay phía trên bảng giá không?",
+        "Cảm ơn bạn! Chúc bạn có một ngày làm việc hiệu suất gấp 10 lần cùng Zenith AI! 🚀"
+      ];
+      answer = positiveReplies[Math.floor(Math.random() * positiveReplies.length)];
+    }
+    // 3. Phản hồi câu hỏi về khái niệm Zenith AI
+    else if (textLower.includes('là gì') || textLower.includes('zenith') || textLower.includes('ai là ai') || textLower.includes('giới thiệu')) {
+      answer = "Zenith AI là một **không gian làm việc thông minh thế hệ mới**, kết hợp công cụ soạn thảo Canvas trực quan và các **AI Agent tự vận hành**. Hệ thống giúp bạn tự động hóa nghiên cứu, viết tài liệu, tối ưu mã nguồn và lập kế hoạch mà không cần chuyển đổi tab liên tục.";
+    }
+    // 4. Phản hồi về giá cả / nâng cấp gói
+    else if (textLower.includes('giá') || textLower.includes('bảng giá') || textLower.includes('pricing') || textLower.includes('tiền') || textLower.includes('mua') || textLower.includes('gói') || textLower.includes('cost')) {
+      answer = "Zenith AI có 3 gói cước linh hoạt:\n- **Cá nhân ($0):** Tính năng cơ bản cho cá nhân.\n- **Chuyên nghiệp ($15-$19/tháng):** Không giới hạn số lượng Agent và lượt chạy.\n- **Doanh nghiệp ($49/tháng):** Bảo mật On-Premise và tùy biến Agent.\n\n*Mách nhỏ: Bạn có thể tự sinh mã kích hoạt dùng thử 14 ngày Pro miễn phí tại widget ngay trên mục Bảng giá đấy!*";
+    }
+    // 5. Phản hồi về bảo mật / dữ liệu
+    else if (textLower.includes('bảo mật') || textLower.includes('an toàn') || textLower.includes('dữ liệu') || textLower.includes('security') || textLower.includes('khóa')) {
+      answer = "An toàn dữ liệu là ưu tiên số 1 của Zenith AI. Dữ liệu được mã hóa hai đầu bằng chuẩn **AES-256** và truyền qua đường kết nối SSL an toàn. Ngoài ra, chúng tôi cam kết không sử dụng dữ liệu của bạn để huấn luyện mô hình công cộng khi chưa được cấp phép.";
+    }
+    // 6. Phản hồi về tính năng chính
+    else if (textLower.includes('tính năng') || textLower.includes('làm được gì') || textLower.includes('chức năng') || textLower.includes('làm gì') || textLower.includes('feature')) {
+      answer = "Zenith AI có các tính năng cốt lõi vượt trội:\n1. **AI Workspaces (Canvas):** Ghi chép và liên kết ý tưởng dạng sơ đồ.\n2. **Autonomous Agents:** Giao việc cho Agent nghiên cứu tự động chạy ngầm.\n3. **Giỏ hàng cước linh hoạt:** Đăng ký và quản lý tùy chọn ngay tại trang.\n4. **Công cụ Debug:** Theo dõi vết hành vi người dùng thời gian thực.";
+    }
+    // 7. Phản hồi về liên hệ / email / hỗ trợ
+    else if (textLower.includes('email') || textLower.includes('liên hệ') || textLower.includes('hỗ trợ') || textLower.includes('support') || textLower.includes('sđt') || textLower.includes('facebook')) {
+      answer = "Bạn có thể liên hệ trực tiếp với đội ngũ sáng lập Zenith AI qua email **support@zenithai.io** hoặc điền thông tin vào form liên hệ ở cuối trang web để được phản hồi trong vòng 24 giờ nhé.";
+    }
+    // 8. Phản hồi về mã kích hoạt / key bản quyền
+    else if (textLower.includes('mã') || textLower.includes('key') || textLower.includes('kích hoạt') || textLower.includes('activation') || textLower.includes('code')) {
+      answer = "Để nhận mã dùng thử 14 ngày Pro, bạn hãy cuộn xuống mục **Bảng giá dịch vụ** và nhấn nút **'Tạo Mã'** ở widget. Hệ thống sẽ tự động giải mã và cấp cho bạn 1 key ngẫu nhiên ngay lập tức!";
+    }
+    // 9. Bộ lọc xử lý các câu nói "tùm lum" của người dùng (Fallback thông minh)
+    else {
+      const fallbacks = [
+        `Tôi đã ghi nhận câu hỏi: "${userText}". Tuy đây là chatbot giả lập thông tin sản phẩm, tôi khuyên bạn nên thử hỏi tôi về các chủ đề như: **"Zenith AI là gì?"**, **"Bảng giá dịch vụ"**, hoặc **"Chính sách bảo mật"** để tôi hỗ trợ tốt nhất!`,
+        `Thật thú vị! Câu hỏi "${userText}" nằm ngoài dữ liệu huấn luyện của tôi một chút. Bạn có muốn biết thêm về cách các **AI Agent tự vận hành** của Zenith giúp bạn tiết kiệm 90% thời gian làm việc không?`,
+        `Hệ thống Zenith AI ghi nhận lệnh của bạn! Để kiểm tra sản phẩm thực tế, bạn có thể gửi form đăng ký dùng thử ở cuối trang, hoặc tự tạo mã kích hoạt Pro dùng thử tại mục Bảng Giá nhé.`
+      ];
+      answer = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+
     setTimeout(() => {
       typingIndicator.remove();
       appendChatMessage(answer, 'bot');
-    }, 1200);
+    }, 1000);
   };
 
   const sendMessage = () => {
@@ -955,6 +1125,122 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
     
     handleBotResponse(question);
   });
+
+  /* ==========================================================================
+     Bonus 1: Mouse Spotlight Glow Effect
+     ========================================================================== */
+  const glowCards = document.querySelectorAll('.feature-card, .spec-card, .pricing-card');
+  glowCards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--mouse-x', `${x}px`);
+      card.style.setProperty('--mouse-y', `${y}px`);
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.removeProperty('--mouse-x');
+      card.style.removeProperty('--mouse-y');
+    });
+  });
+
+  /* ==========================================================================
+     Bonus 3: Scroll Progress Indicator & Scroll-to-Top Button
+     ========================================================================== */
+  const scrollProgressBar = document.getElementById('scroll-progress-bar');
+  const scrollToTopBtn = document.getElementById('scroll-to-top');
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    
+    // 1. Cập nhật chiều rộng thanh tiến trình
+    if (docHeight > 0 && scrollProgressBar) {
+      const scrollPercent = (scrollTop / docHeight) * 100;
+      scrollProgressBar.style.width = `${scrollPercent}%`;
+    }
+    
+    // 2. Ẩn/hiển thị nút cuộn lên đầu trang
+    if (scrollToTopBtn) {
+      if (scrollTop > 300) {
+        scrollToTopBtn.classList.add('visible');
+      } else {
+        scrollToTopBtn.classList.remove('visible');
+      }
+    }
+  });
+
+  // Xử lý click cuộn mượt lên đỉnh trang
+  if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+  }
+
+  /* ==========================================================================
+     Bonus 4: License Key Generator (Matrix Effect)
+     ========================================================================== */
+  const generateKeyBtn = document.getElementById('generate-key-btn');
+  const keyDisplayBox = document.getElementById('key-display-box');
+  const keyTextEl = document.getElementById('key-text');
+  
+  if (generateKeyBtn && keyDisplayBox && keyTextEl) {
+    let isGenerating = false;
+    
+    generateKeyBtn.addEventListener('click', () => {
+      if (isGenerating) return;
+      isGenerating = true;
+      
+      generateKeyBtn.disabled = true;
+      generateKeyBtn.textContent = 'Đang tạo...';
+      keyDisplayBox.classList.add('generating');
+      showTrackerToast('[Bonus] Khởi chạy bộ giải mã Licence Key...');
+      
+      // Chạy hiệu ứng Matrix nhiễu chữ ngẫu nhiên
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let scrambleInterval = setInterval(() => {
+        let randPart1 = '';
+        let randPart2 = '';
+        for (let i = 0; i < 4; i++) {
+          randPart1 += chars.charAt(Math.floor(Math.random() * chars.length));
+          randPart2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        keyTextEl.textContent = `ZPRO-${randPart1}-${randPart2}`;
+      }, 50);
+      
+      // Dừng lại sau 1.2 giây và hiển thị key thực sự
+      setTimeout(() => {
+        clearInterval(scrambleInterval);
+        
+        // Tạo key ngẫu nhiên dạng ZPRO-XXXX-XXXX
+        let finalPart1 = '';
+        let finalPart2 = '';
+        for (let i = 0; i < 4; i++) {
+          finalPart1 += chars.charAt(Math.floor(Math.random() * chars.length));
+          finalPart2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        const finalKey = `ZPRO-${finalPart1}-${finalPart2}`;
+        keyTextEl.textContent = finalKey;
+        keyDisplayBox.classList.remove('generating');
+        
+        // Hiệu ứng nháy xanh lục báo thành công
+        keyTextEl.style.color = 'var(--accent-green)';
+        setTimeout(() => {
+          keyTextEl.style.color = '';
+        }, 800);
+        
+        generateKeyBtn.disabled = false;
+        generateKeyBtn.textContent = 'Tạo Mã';
+        isGenerating = false;
+        
+        showTrackerToast(`[Bonus] Tạo thành công Licence Key Pro dùng thử: ${finalKey}`);
+      }, 1200);
+    });
+  }
 
   // Khởi tạo hiển thị dữ liệu lịch sử giỏ hàng
   renderHistory();
