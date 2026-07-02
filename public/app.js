@@ -431,6 +431,8 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
   };
 
   // Add click events to prompt buttons
+  const simulatorCustomInput = document.getElementById('simulator-custom-input');
+
   promptButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       // Set active state
@@ -439,9 +441,115 @@ window.addEventListener('scroll', debounce(doHeavyScrollCalculation));` },
       activeBtn.classList.add('active');
 
       const promptKey = activeBtn.getAttribute('data-prompt');
-      runSimulation(promptKey);
+      
+      if (promptKey === 'custom') {
+        clearAllSimulations();
+        agentNameEl.textContent = 'Custom-Agent';
+        simulatedUserInput.style.display = 'none';
+        
+        if (simulatorCustomInput) {
+          simulatorCustomInput.style.display = 'inline-block';
+          simulatorCustomInput.value = '';
+          setTimeout(() => simulatorCustomInput.focus(), 50);
+        }
+        
+        terminalChat.innerHTML = '';
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        line.style.color = '#8b5cf6';
+        line.innerHTML = `<span class="terminal-prefix">[sys]</span> Chế độ Tự viết Prompt đã sẵn sàng. Hãy gõ bất kỳ yêu cầu nào ở dòng lệnh bên dưới (ví dụ: 'viết bài cafe', 'tối ưu code') rồi bấm Enter!`;
+        terminalChat.appendChild(line);
+      } else {
+        if (simulatorCustomInput) {
+          simulatorCustomInput.style.display = 'none';
+        }
+        simulatedUserInput.style.display = 'inline-block';
+        runSimulation(promptKey);
+      }
     });
   });
+
+  // Xử lý khi nhấn Enter để chạy câu lệnh Custom
+  if (simulatorCustomInput) {
+    simulatorCustomInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const userPrompt = simulatorCustomInput.value.trim();
+        if (!userPrompt) return;
+
+        simulatorCustomInput.value = '';
+        terminalChat.innerHTML = ''; // Clear terminal
+
+        // Hiển thị câu lệnh của người dùng
+        const userLine = document.createElement('div');
+        userLine.className = 'terminal-line';
+        userLine.innerHTML = `<span class="terminal-prefix" style="color: #a855f7;">&gt;</span> <span class="terminal-output" style="color: #e2e8f0; font-weight: bold;">${userPrompt}</span>`;
+        terminalChat.appendChild(userLine);
+
+        // Hiển thị thông báo hệ thống bắt đầu chạy
+        const sysLine = document.createElement('div');
+        sysLine.className = 'terminal-line';
+        sysLine.style.color = '#a1a1aa';
+        sysLine.innerHTML = `<span class="terminal-prefix">[sys]</span> Đang biên dịch câu lệnh và phân tích ngữ cảnh không gian làm việc...`;
+        terminalChat.appendChild(sysLine);
+
+        // Phân tích từ khóa để trả về kết quả tương ứng
+        let agentName = 'ZenithAI-Agent';
+        let logs = [];
+        const textLower = userPrompt.toLowerCase();
+
+        if (textLower.includes('code') || textLower.includes('tối ưu') || textLower.includes('refactor') || textLower.includes('lập trình') || textLower.includes('hàm') || textLower.includes('sửa')) {
+          agentName = 'Coder-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: Coder-Agent v2.1...' },
+            { type: 'info', text: 'Đang quét phân tích cấu trúc cú pháp AST...' },
+            { type: 'code', text: `// KẾT QUẢ TỐI ƯU HÀM CHO CÂU LỆNH: "${userPrompt}"
+function findDuplicate(arr) {
+  const seen = new Set();
+  for (let num of arr) {
+    if (seen.has(num)) return num;
+    seen.add(num);
+  }
+  return null;
+}` },
+            { type: 'success', text: 'Đã hoàn tất! Hàm code được tối ưu hóa thành công sang độ phức tạp O(N).' }
+          ];
+        } else if (textLower.includes('viết') || textLower.includes('bài') || textLower.includes('quảng cáo') || textLower.includes('fb') || textLower.includes('facebook') || textLower.includes('marketing') || textLower.includes('sales')) {
+          agentName = 'Copywriter-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: Copywriter-Agent v2.0...' },
+            { type: 'info', text: 'Đang lên dàn bài và định hình văn phong quảng cáo thu hút...' },
+            { type: 'code', text: `✨ BÀI VIẾT QUẢNG CÁO TẠO THEO YÊU CẦU: "${userPrompt}" ✨
+
+🚀 Không gian làm việc thông minh thế hệ mới - Zenith AI!
+Giải phóng 90% thời gian xử lý các tác vụ lặp đi lặp lại nhờ trợ lý AI tự vận hành:
+- Tự viết code, tối ưu hàm hiệu suất cao.
+- Tự viết content quảng cáo & nghiên cứu đối thủ cạnh tranh.
+👉 Click nút dùng thử 14 ngày Pro miễn phí ngay!` },
+            { type: 'success', text: 'Tạo bài quảng cáo thành công và lưu vào thư mục output/custom-ad.txt.' }
+          ];
+        } else {
+          agentName = 'ZenithAI-Agent';
+          logs = [
+            { type: 'system', text: 'Initializing Agent: ZenithAI-Agent...' },
+            { type: 'info', text: `Đang khởi chạy luồng tự động hóa cho yêu cầu: "${userPrompt}"...` },
+            { type: 'info', text: 'Đang kết xuất và tổng hợp kết quả...' },
+            { type: 'code', text: `[ZenithAI-Agent] ĐÃ NHẬN LỆNH: "${userPrompt}"
+- Tác vụ: Đã nhận diện và lưu vết lịch sử hệ thống.
+- Tiến độ: 100% hoàn thành.
+- Kết quả: Đã tự động hóa thành công.` },
+            { type: 'success', text: 'Tác vụ chạy thử nghiệm kết thúc tốt đẹp!' }
+          ];
+        }
+
+        agentNameEl.textContent = agentName;
+
+        // Chạy logs giả lập
+        setTimeout(() => {
+          playTerminalLogs(logs);
+        }, 1000);
+      }
+    });
+  }
 
   // Chỉ tự động chạy simulator khi cuộn tới phần này
   const simulatorSection = document.getElementById('simulator');

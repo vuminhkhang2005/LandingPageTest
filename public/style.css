@@ -2836,3 +2836,14 @@ html[data-theme="light"] .spec-card,
 html[data-theme="light"] .pricing-card {
   background: radial-gradient(350px circle at var(--mouse-x, -9999px) var(--mouse-y, -9999px), rgba(139, 92, 246, 0.04), transparent 80%), var(--card-bg) !important;
 }
+
+/* 2. AI Simulator Custom Input */
+.simulator-custom-input {
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-family: monospace;
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+}

@@ -406,6 +406,13 @@
                 <span class="prompt-desc">Phân tích xu hướng SaaS</span>
               </div>
             </button>
+            <button class="prompt-btn" data-prompt="custom" id="prompt-custom-btn">
+              <span class="prompt-icon">✍️</span>
+              <div class="text-left">
+                <span class="prompt-title">Tự viết Prompt</span>
+                <span class="prompt-desc">Gõ câu lệnh tùy ý bạn</span>
+              </div>
+            </button>
           </div>
 
           <div class="simulator-screen">
@@ -436,6 +443,7 @@
               <div class="simulator-input-simulation">
                 <span class="prompt-symbol">&gt;</span>
                 <span class="simulated-input-text" id="simulated-user-input">Đang chuẩn bị câu lệnh...</span>
+                <input type="text" id="simulator-custom-input" class="simulator-custom-input" placeholder="Nhập lệnh của bạn (Ví dụ: 'viết bài cafe', 'tối ưu hàm') rồi ấn Enter..." style="display: none;" aria-label="Nhập lệnh cho Agent">
               </div>
             </div>
           </div>
