@@ -5,12 +5,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Bỏ class preload để kích hoạt transition sau khi trang đã load xong
-  document.documentElement.classList.remove('preload');
+  // Bỏ class preload khỏi body để kích hoạt transition cho hover và click ngay lập tức
   document.body.classList.remove('preload');
 
-  // Dự phòng gỡ bỏ css-loading khi mọi tài nguyên đã tải xong hoàn toàn
+  // Gỡ bỏ css-loading và preload khỏi html khi mọi tài nguyên đã tải xong hoàn toàn (để tránh lỗi trượt scroll của Chrome)
   window.addEventListener('load', () => {
+    document.documentElement.classList.remove('preload');
     document.body.classList.remove('css-loading');
   });
 
