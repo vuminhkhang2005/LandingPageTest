@@ -404,7 +404,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 
 /* 5. Hero Section */
 .hero-section {
-  padding-top: 100px;
+  padding-top: 90px;
   padding-bottom: 80px;
   position: relative;
   overflow: hidden;
@@ -429,7 +429,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--accent-purple);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .badge-dot {
@@ -442,20 +442,20 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 
 .hero-title {
   font-size: clamp(2.5rem, 4.5vw, 4rem);
-  margin-bottom: var(--space-md);
+  margin-bottom: 1.25rem;
   font-weight: 800;
 }
 
 .hero-subtitle {
   font-size: 1.15rem;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
   max-width: 580px;
 }
 
 .hero-actions {
   display: flex;
   gap: 1rem;
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .hero-stats {
