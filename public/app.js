@@ -4,15 +4,103 @@
  * Pricing Switcher, Accordions, Form validation and Scroll animations.
  */
 
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Bỏ class preload khỏi body để kích hoạt transition cho hover và click ngay lập tức
-  document.body.classList.remove('preload');
+  document.body.classList.remove('preload', 'css-loading');
 
   // Gỡ bỏ css-loading và preload khỏi html khi mọi tài nguyên đã tải xong hoàn toàn (để tránh lỗi trượt scroll của Chrome)
   window.addEventListener('load', () => {
     document.documentElement.classList.remove('preload');
-    document.body.classList.remove('css-loading');
+    document.body.classList.remove('preload', 'css-loading');
   });
+
+  const getNavigationType = () => {
+    const [navigationEntry] = performance.getEntriesByType ? performance.getEntriesByType('navigation') : [];
+    if (navigationEntry && navigationEntry.type) return navigationEntry.type;
+    if (performance.navigation && performance.navigation.type === 1) return 'reload';
+    if (performance.navigation && performance.navigation.type === 2) return 'back_forward';
+    return 'navigate';
+  };
+
+  const scrollStorageKey = `zenith-scroll:${window.location.pathname}${window.location.search}`;
+  const shouldRestoreScroll = !window.location.hash && ['reload', 'back_forward'].includes(getNavigationType());
+
+  const readStoredScroll = () => {
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(scrollStorageKey) || 'null');
+      if (!stored || typeof stored.y !== 'number') return null;
+      if (Date.now() - (stored.t || 0) > 30 * 60 * 1000) return null;
+      return stored;
+    } catch {
+      return null;
+    }
+  };
+
+  const writeCurrentScroll = () => {
+    try {
+      sessionStorage.setItem(scrollStorageKey, JSON.stringify({
+        y: window.scrollY || document.documentElement.scrollTop || 0,
+        t: Date.now()
+      }));
+    } catch {
+      // Ignore storage failures in private or restricted browser modes.
+    }
+  };
+
+  let scrollSaveRaf = null;
+  const scheduleScrollSave = () => {
+    if (scrollSaveRaf !== null) return;
+    scrollSaveRaf = requestAnimationFrame(() => {
+      scrollSaveRaf = null;
+      writeCurrentScroll();
+    });
+  };
+
+  const restoreStoredScroll = () => {
+    if (!shouldRestoreScroll || restoreStoredScroll.done) return;
+
+    const stored = readStoredScroll();
+    if (!stored) return;
+
+    restoreStoredScroll.done = true;
+    let attempts = 0;
+    let lastHeight = 0;
+    let stableFrames = 0;
+
+    const applyRestore = () => {
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const targetY = Math.min(stored.y, maxY);
+
+      window.scrollTo({ left: 0, top: targetY, behavior: 'auto' });
+
+      const currentHeight = document.documentElement.scrollHeight;
+      if (currentHeight === lastHeight) {
+        stableFrames += 1;
+      } else {
+        stableFrames = 0;
+        lastHeight = currentHeight;
+      }
+
+      attempts += 1;
+      if (attempts < 30 && stableFrames < 3) {
+        requestAnimationFrame(applyRestore);
+      } else {
+        setTimeout(() => window.scrollTo({ left: 0, top: targetY, behavior: 'auto' }), 80);
+      }
+    };
+
+    requestAnimationFrame(applyRestore);
+  };
+
+  window.addEventListener('scroll', scheduleScrollSave, { passive: true });
+  window.addEventListener('pagehide', writeCurrentScroll);
+  window.addEventListener('beforeunload', writeCurrentScroll);
+  window.addEventListener('load', restoreStoredScroll, { once: true });
+  setTimeout(restoreStoredScroll, 120);
 
   /* ==========================================================================
      1. Theme Management (Light/Dark Mode)
@@ -87,9 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const skeleton = document.getElementById(config.skeletonId);
     const content = document.getElementById(config.contentId);
     if (skeleton && content) {
-      skeleton.style.display = 'flex';
-      content.style.display = 'none';
-      content.style.opacity = '0';
+      skeleton.style.display = 'none';
+      skeleton.setAttribute('aria-hidden', 'true');
+      content.style.display = 'grid';
+      content.style.opacity = '1';
     }
   });
 

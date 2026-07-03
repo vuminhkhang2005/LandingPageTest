@@ -98,6 +98,9 @@ html {
   scroll-behavior: smooth;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -105,9 +108,28 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
-  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   position: relative;
   transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+main,
+section,
+.main-footer {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html,
+  body,
+  main,
+  section,
+  .main-footer {
+    overflow-x: hidden;
+  }
 }
 
 /* Grid & Layout Containers */
@@ -135,7 +157,7 @@ body {
   max-width: 600px;
   max-height: 600px;
   top: -10%;
-  right: -5%;
+  right: 0;
   background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(59, 130, 246, 0.1) 70%, transparent 100%);
 }
 
@@ -145,7 +167,7 @@ body {
   max-width: 500px;
   max-height: 500px;
   top: 40%;
-  left: -10%;
+  left: 0;
   background: radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, rgba(139, 92, 246, 0.1) 70%, transparent 100%);
 }
 
@@ -2129,6 +2151,16 @@ html[data-theme="light"] .section-skeleton .skel-card {
     background-color: var(--bg-secondary);
   }
 
+  .animate-on-scroll[data-anim="fade-left"],
+  .animate-on-scroll[data-anim="fade-right"] {
+    transform: translateY(32px);
+  }
+
+  .animate-on-scroll[data-anim="fade-left"].active,
+  .animate-on-scroll[data-anim="fade-right"].active {
+    transform: translateY(0);
+  }
+
   .mobile-menu-open .mobile-nav-toggle span:nth-child(1) {
     transform: translateY(8px) rotate(45deg);
   }
@@ -2309,6 +2341,7 @@ html[data-theme="light"] .section-skeleton .skel-card {
   height: 100%;
   z-index: 1100;
   visibility: hidden;
+  overflow: hidden;
   transition: visibility var(--transition-normal);
 }
 
