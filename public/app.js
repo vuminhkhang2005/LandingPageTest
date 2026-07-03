@@ -6,6 +6,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // Bỏ class preload để kích hoạt transition sau khi trang đã load xong
+  document.documentElement.classList.remove('preload');
   document.body.classList.remove('preload');
 
   // Dự phòng gỡ bỏ css-loading khi mọi tài nguyên đã tải xong hoàn toàn
