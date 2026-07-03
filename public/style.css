@@ -412,7 +412,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 
 .hero-container {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: var(--space-xl);
 }
@@ -462,6 +462,7 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   display: flex;
   align-items: center;
   gap: 2rem;
+  padding-left: 4rem;
 }
 
 .stat-item {
@@ -496,13 +497,13 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   justify-content: center;
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
   margin: 0 auto;
 }
 
 .visual-mockup {
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
   aspect-ratio: 1.15; /* Tăng chiều cao lên một chút để vừa vặn nội dung bên trong */
   background-color: #0c0a0f;
   border: 1px solid rgba(255, 255, 255, 0.12); /* Viền tĩnh sáng để không bị chìm ở Light mode */
@@ -2043,6 +2044,7 @@ html[data-theme="light"] .section-skeleton .skel-card {
 
   .hero-stats {
     justify-content: center;
+    padding-left: 0;
   }
 
   .simulator-container {
