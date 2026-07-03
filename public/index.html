@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (function() {
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
       const savedTheme = localStorage.getItem('zenith-theme');
       const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       document.documentElement.setAttribute('data-theme', theme);
@@ -44,13 +47,13 @@
     .cart-drawer{position:fixed;top:0;right:0;width:100%;height:100%;z-index:1100;visibility:hidden}.cart-drawer-content{position:absolute;top:0;right:0;width:100%;max-width:420px;height:100%;transform:translateX(100%)}.chatbot-window{position:absolute;bottom:72px;right:0;width:350px;height:480px;transform:translateY(20px) scale(.9);opacity:0;pointer-events:none}.debug-console{display:none}.scroll-to-top-btn{position:fixed;bottom:90px;right:24px;opacity:0;visibility:hidden}.preload *{transition:none!important;-webkit-transition:none!important}.faq-accordion-container{display:flex;flex-direction:column;gap:var(--space-sm)}.faq-item{background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--radius-md);overflow:hidden}.faq-question{width:100%;padding:1.2rem var(--space-md);background:0 0;border:none;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-heading);font-weight:700;color:var(--text-primary)}.faq-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center}.faq-icon-svg{width:100%;height:100%;color:var(--text-muted)}.faq-answer{max-height:0;overflow:hidden}.css-loading section:not(.hero-section):not(.features-section),.css-loading footer,.css-loading .debug-panel,.css-loading .chatbot-container{opacity:0;visibility:hidden;pointer-events:none}.w-4{width:1rem}.h-4{height:1rem}.w-5{width:1.25rem}.h-5{height:1.25rem}.logo-icon{width:32px;height:32px}.sun-icon,.moon-icon{width:20px;height:20px}.btn-arrow{width:18px;height:18px}.logo-svg{width:24px;height:24px}.feature-icon{width:24px;height:24px}.check-icon,.close-icon{width:16px;height:16px}.bug-icon{width:20px;height:20px}.chat-icon{width:24px;height:24px}.send-icon{width:16px;height:16px}html.preload{scroll-behavior:auto!important}
   </style>
 
-  <!-- Style CSS (Asynchronous loading for below-the-fold content) -->
-  <link rel="preload" href="style.min.css?v=27" as="style" onload="this.onload=null;this.rel='stylesheet';document.body.classList.remove('css-loading')">
+  <!-- Style CSS -->
+  <link rel="stylesheet" href="style.min.css?v=28">
   <noscript>
-    <link rel="stylesheet" href="style.min.css?v=27">
+    <link rel="stylesheet" href="style.min.css?v=28">
   </noscript>
 </head>
-<body class="preload css-loading">
+<body class="preload">
   <!-- Scroll Progress Indicator Bar -->
   <div id="scroll-progress-bar" class="scroll-progress-bar"></div>
 
@@ -293,7 +296,7 @@
         </div>
 
         <!-- Skeleton placeholder for Features (Shown by default, hidden by JS once loaded) -->
-        <div class="section-skeleton" id="features-skeleton">
+        <div class="section-skeleton hidden" id="features-skeleton" aria-hidden="true">
           <div class="skel-grid">
             <div class="skel-card"></div>
             <div class="skel-card"></div>
@@ -301,7 +304,7 @@
           </div>
         </div>
 
-        <div class="features-grid lazy-section-content" id="features-content" style="display: none; opacity: 0;">
+        <div class="features-grid lazy-section-content" id="features-content">
           <!-- Feature 1 -->
           <div class="feature-card animate-on-scroll" data-anim="fade-left" data-delay="1">
             <div class="feature-icon-wrapper purple-glow">
@@ -1040,6 +1043,6 @@
   </button>
 
   <!-- App JS -->
-  <script src="app.min.js?v=27" defer></script>
+  <script src="app.min.js?v=28" defer></script>
 </body>
 </html>
