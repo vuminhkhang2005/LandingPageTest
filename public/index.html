@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('zenith-theme');
+      const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   <meta name="description" content="Zenith AI - Không gian làm việc thông minh tích hợp trí tuệ nhân tạo. Tự động hóa quy trình, tối ưu hóa ghi chú và quản lý dự án hiệu quả hơn bao giờ hết.">
   <meta name="keywords" content="AI, Productivity, SaaS, Không gian làm việc thông minh, Trí tuệ nhân tạo, Tự động hóa, Quản lý công việc">
   <meta name="author" content="Zenith AI Team">

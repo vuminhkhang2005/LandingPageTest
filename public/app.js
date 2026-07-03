@@ -12,20 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeToggleBtn = document.getElementById('theme-toggle-btn');
   const htmlElement = document.documentElement;
 
-  // Retrieve theme from localStorage or system preferences
-  const getPreferredTheme = () => {
-    const savedTheme = localStorage.getItem('zenith-theme');
-    if (savedTheme) return savedTheme;
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  };
-
   const setTheme = (theme) => {
     htmlElement.setAttribute('data-theme', theme);
     localStorage.setItem('zenith-theme', theme);
   };
-
-  // Initialize Theme
-  setTheme(getPreferredTheme());
 
   // Toggle Theme on Button Click
   themeToggleBtn.addEventListener('click', () => {
