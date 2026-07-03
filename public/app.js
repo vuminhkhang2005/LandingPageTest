@@ -5,8 +5,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Bỏ class preload và css-loading để kích hoạt transition/hiển thị trang sau khi load xong
-  document.body.classList.remove('preload', 'css-loading');
+  // Bỏ class preload để kích hoạt transition sau khi trang đã load xong
+  document.body.classList.remove('preload');
+
+  // Dự phòng gỡ bỏ css-loading khi mọi tài nguyên đã tải xong hoàn toàn
+  window.addEventListener('load', () => {
+    document.body.classList.remove('css-loading');
+  });
 
   /* ==========================================================================
      1. Theme Management (Light/Dark Mode)
