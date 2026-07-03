@@ -5,6 +5,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Bỏ class preload để kích hoạt transition sau khi trang đã load xong
+  document.body.classList.remove('preload');
 
   /* ==========================================================================
      1. Theme Management (Light/Dark Mode)
