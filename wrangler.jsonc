@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "zenithai",
+  "name": "aizenith",
   "compatibility_date": "2026-07-01",
 
   "observability": {
