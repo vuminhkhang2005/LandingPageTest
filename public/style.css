@@ -2992,3 +2992,15 @@ html[data-theme="light"] .pricing-card {
     width: 100%;
   }
 }
+
+/* 5. Performance Optimizations (PageSpeed) */
+.features-section,
+.specs-section,
+.simulator-section,
+.testimonials-section,
+.pricing-section,
+.faq-section,
+.contact-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
