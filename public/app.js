@@ -60,6 +60,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  let userHasScrolled = false;
+  window.addEventListener('wheel', () => userHasScrolled = true, { passive: true });
+  window.addEventListener('touchmove', () => userHasScrolled = true, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'Space', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+      userHasScrolled = true;
+    }
+  }, { passive: true });
+
   const restoreStoredScroll = () => {
     if (!shouldRestoreScroll || restoreStoredScroll.done) return;
 
@@ -67,36 +76,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!stored) return;
 
     restoreStoredScroll.done = true;
-    let attempts = 0;
-    let lastHeight = 0;
-    let stableFrames = 0;
 
-    const applyRestore = () => {
+    const performScroll = () => {
+      if (userHasScrolled) return;
       const currentHeight = document.documentElement.scrollHeight;
       const maxY = Math.max(0, currentHeight - window.innerHeight);
-      const targetY = Math.min(stored.y, maxY);
-
-      window.scrollTo({ left: 0, top: targetY, behavior: 'auto' });
-
-      if (currentHeight === lastHeight) {
-        stableFrames += 1;
-      } else {
-        stableFrames = 0;
-        lastHeight = currentHeight;
-      }
-
-      attempts += 1;
-      if (attempts < 30 && stableFrames < 3) {
-        requestAnimationFrame(applyRestore);
-      } else {
-        setTimeout(() => {
-          const finalMaxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-          window.scrollTo({ left: 0, top: Math.min(stored.y, finalMaxY), behavior: 'auto' });
-        }, 80);
-      }
+      window.scrollTo({ left: 0, top: Math.min(stored.y, maxY), behavior: 'auto' });
     };
 
-    requestAnimationFrame(applyRestore);
+    performScroll();
+
+    // Use ResizeObserver to restore scroll on body size changes (extremely efficient, no layout thrashing)
+    const resizeObserver = new ResizeObserver(() => {
+      performScroll();
+    });
+    resizeObserver.observe(document.body);
+
+    // Disconnect after window is fully loaded
+    window.addEventListener('load', () => {
+      performScroll();
+      setTimeout(() => resizeObserver.disconnect(), 150);
+    }, { once: true });
+
+    // Fallback protection to disconnect after 2 seconds
+    setTimeout(() => {
+      resizeObserver.disconnect();
+    }, 2000);
   };
 
   window.addEventListener('scroll', scheduleScrollSave, { passive: true });
@@ -176,6 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
     "Xây dựng các trigger và action để tự động hóa mọi thao tác lặp đi lặp lại.": "Create triggers and actions to automate repetitive tasks instantly.",
     "Bảo Mật Tuyệt Đối": "Enterprise Security",
     "Dữ liệu được mã hóa đầu cuối và lưu trữ riêng tư theo chuẩn doanh nghiệp.": "End-to-end encrypted data with strict enterprise-grade privacy standards.",
+    "Bản đồ kiến thức": "Interactive Knowledge Map",
+    "Tự động liên kết các ghi chú, công việc và ý tưởng của bạn thành một sơ đồ trực quan, giúp bạn phát hiện những điểm kết nối ẩn sâu.": "Automatically links your notes, tasks, and ideas into a visual map, helping you uncover deep hidden connections.",
+    "Bộ soạn thảo đa chế độ": "Multi-mode Editor",
+    "Chuyển đổi liền mạch giữa soạn thảo văn bản, viết code và ghi chú nhanh bằng giọng nói. AI sẽ tự định dạng theo ý bạn.": "Seamlessly switch between text writing, coding, and voice notes. AI auto-formats to match your intent.",
+    "Tự động hóa luồng việc": "Workflow Automation",
+    "Kết nối hàng ngàn ứng dụng với Zenith AI bằng các câu lệnh ngôn ngữ tự nhiên, không cần cấu hình API phức tạp.": "Connect thousands of apps to Zenith AI using natural language commands, no complex API setups required.",
 
     // Specs Section
     "Thông Số Ấn Tượng": "Impressive Metrics",
@@ -184,6 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
     "Độ trễ phản hồi của Agent": "Agent Response Latency",
     "Nhiệm vụ đã hoàn thành": "Tasks Completed",
     "Mã hóa dữ liệu đầu cuối": "End-to-End Encryption",
+    "Thông số kỹ thuật & Hiệu năng": "Technical Specs & Performance",
+    "Kiến trúc hạ tầng vượt trội, tối ưu hóa cho tốc độ xử lý và tính bảo mật thông tin.": "Superior infrastructure architecture, optimized for execution speed and absolute data security.",
+    "Độ trễ trung bình": "Average Latency",
+    "Phản hồi và hoàn thành các tác vụ phức tạp với tốc độ cực nhanh nhờ hạ tầng mạng Edge toàn cầu.": "Respond and complete complex tasks at blistering speeds powered by our global Edge network.",
+    "Độ tin cậy SLA": "SLA Reliability",
+    "Hệ thống phân tán đa vùng bảo đảm dịch vụ luôn sẵn sàng phục vụ mọi lúc.": "Multi-region distributed system ensures services are always available around the clock.",
+    "Mã hóa dữ liệu": "Data Encryption",
+    "Bảo mật dữ liệu tuyệt đối với tiêu chuẩn AES-256 ở trạng thái nghỉ và đường truyền bảo mật SSL.": "Absolute security with AES-256 standard at rest and secure SSL transit.",
+    "Tích hợp sẵn có": "Out-of-the-box Integrations",
+    "Kết nối mượt mà với Slack, Notion, GitHub, Google Drive thông qua hệ thống khóa API an toàn.": "Seamlessly connect with Slack, Notion, GitHub, and Google Drive via secure API keys.",
 
     // Simulator Section
     "Trải Nghiệm Trực Quan": "Interactive Simulator",
@@ -196,6 +217,17 @@ document.addEventListener('DOMContentLoaded', () => {
     "Thiết lập quy trình đồng bộ...": "Set up synchronization...",
     "Chờ lệnh...": "Waiting for command...",
     "Nhập lệnh của bạn ở đây (ví dụ: 'Nghiên cứu đối thủ')...": "Enter your command here (e.g., 'Analyze competitors')...",
+    "Xem cách nó vận hành": "See How It Works",
+    "Chọn một câu lệnh bên dưới để xem cách Zenith AI tự động xử lý công việc.": "Select a command below to see how Zenith AI automates tasks.",
+    "Viết bài quảng cáo": "Write Ad Copy",
+    "Cho sản phẩm mới": "For new product",
+    "Tối ưu hóa Code": "Code Optimization",
+    "Sửa lỗi rò rỉ bộ nhớ": "Fix memory leak",
+    "Phân tích xu hướng SaaS": "Analyze SaaS trends",
+    "Tự viết Prompt": "Write Your Own Prompt",
+    "Gõ câu lệnh tùy ý bạn": "Type custom commands",
+    "Đang chuẩn bị câu lệnh...": "Preparing command...",
+    "Nhập lệnh của bạn (Ví dụ: 'viết bài cafe', 'tối ưu hàm') rồi ấn Enter...": "Enter your command (e.g. 'write ad', 'optimize function') and press Enter...",
 
     // Testimonials
     "Ý Kiến Khách Hàng": "Customer Testimonials",
@@ -206,6 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
     "Nhà sáng lập Vortex Studio": "Founder of Vortex Studio",
     "“Giao diện kéo thả dễ dùng, tích hợp mượt mà. Đội ngũ của tôi giờ đây có thể tập trung vào các ý tưởng đột phá thay vì các tác vụ lặp lại.”": "“Easy drag-and-drop interface, smooth integrations. My team can now focus on breakthrough ideas instead of repeating manual tasks.”",
     "Quản lý Dự án tại Prism": "Project Manager at Prism",
+    "Nhận xét từ khách hàng": "Customer Reviews",
+    "Xem cách người dùng trên toàn thế giới đột phá năng suất với Zenith AI.": "See how users worldwide are skyrocketing their productivity with Zenith AI.",
+    "\"Zenith AI thực sự đã thay đổi cách tôi lập trình và nghiên cứu. Tính năng Bản đồ Kiến thức tự động giúp tôi liên kết hàng trăm tài liệu mà không tốn công sức nào.\"": "\"Zenith AI has completely transformed the way I code and research. The automated Knowledge Map feature lets me link hundreds of documents effortlessly.\"",
+    "\"Các AI Agent tự vận hành thực sự đáng kinh ngạc. Tôi có thể giao cho Agent nghiên cứu đối thủ cạnh tranh trong đêm và nhận lại báo cáo chi tiết vào sáng hôm sau.\"": "\"The autonomous AI Agents are absolutely mind-blowing. I can delegate competitor research to an Agent overnight and receive a detailed report the next morning.\"",
+    "\"Thiết kế giao diện Dark Mode cực kỳ sang trọng, trải nghiệm người dùng mượt mà chưa từng thấy ở các công cụ AI khác. Đáng giá đến từng đồng!\"": "\"The Dark Mode interface design is extremely premium, and the user experience is smoother than any other AI tools I have used. Worth every single penny!\"",
 
     // Pricing Section
     "Bảng Giá Linh Hoạt": "Flexible Pricing",
@@ -235,6 +272,30 @@ document.addEventListener('DOMContentLoaded', () => {
     "Tích hợp hệ thống nội bộ": "Internal Systems Integration",
     "Bảo mật & Cam kết SLA riêng": "Dedicated Security & SLA",
     "Quản lý tài khoản riêng biệt": "Dedicated Account Manager",
+    "Gói dịch vụ linh hoạt": "Flexible Plans",
+    "Bắt đầu miễn phí và nâng cấp khi bạn cần tự động hóa nâng cao.": "Start for free and upgrade when you need advanced automation.",
+    "🔑 Nhận Mã Kích Hoạt 14 Ngày Dùng Thử Pro": "🔑 Get a 14-Day Pro Trial Activation Key",
+    "Hệ thống tự động cấp mã ngẫu nhiên cho bản dùng thử Pro. Giới hạn 1 key/lần click.": "The system automatically issues a random code for the Pro trial. Limit 1 key per click.",
+    "Cá nhân": "Personal",
+    "Hoàn hảo cho người mới bắt đầu tối ưu hóa năng suất.": "Perfect for beginners looking to optimize their productivity.",
+    "Không gian làm việc Canvas cơ bản": "Basic Canvas Workspace",
+    "Tích hợp 1 AI Agent cơ bản": "1 Integrated Basic AI Agent",
+    "100 lượt truy vấn AI mỗi tháng": "100 AI queries per month",
+    "Khuyên dùng": "Recommended",
+    "Chuyên nghiệp": "Pro",
+    "Dành cho cá nhân và nhóm nhỏ muốn tự động hóa toàn diện.": "For individuals and small teams looking for full automation.",
+    "Không giới hạn Canvas và Tài liệu": "Unlimited Canvas and Documents",
+    "Hỗ trợ 5 AI Agents chạy song song": "Supports 5 AI Agents running in parallel",
+    "Không giới hạn lượt truy vấn AI": "Unlimited AI queries",
+    "Tích hợp hơn 1,000+ ứng dụng bên thứ ba": "Integrations with 1,000+ third-party apps",
+    "Nâng cấp Pro": "Upgrade to Pro",
+    "Doanh nghiệp": "Enterprise",
+    "Các giải pháp tùy biến cho tổ chức cần tính bảo mật tối đa.": "Customized solutions for organizations requiring maximum security.",
+    "Mọi tính năng của gói Pro": "All features of the Pro plan",
+    "Không giới hạn số lượng AI Agents": "Unlimited number of AI Agents",
+    "Hỗ trợ lưu trữ dữ liệu Private Cloud / On-Premise": "Supports Private Cloud / On-Premise data storage",
+    "Hỗ trợ kỹ thuật 24/7 chuyên biệt": "Dedicated 24/7 technical support",
+    "Liên hệ kinh doanh": "Contact Sales",
 
     // FAQ Section
     "Câu Hỏi Thường Gặp": "Frequently Asked Questions",
@@ -245,6 +306,14 @@ document.addEventListener('DOMContentLoaded', () => {
     "Có, dữ liệu của bạn được mã hóa 256-bit khi truyền tải và lưu trữ. Chúng tôi cam kết không sử dụng dữ liệu của bạn để huấn luyện mô hình AI công cộng.": "Yes, your data is protected with 256-bit encryption during transit and storage. We guarantee that your data is never used to train public AI models.",
     "Tôi có thể tích hợp với các công cụ khác không?": "Can I integrate with other tools?",
     "Hoàn toàn được. Zenith AI hỗ trợ tích hợp với Slack, GitHub, Notion, Jira và các API tùy chỉnh khác để tự động hóa hoàn toàn quy trình làm việc của bạn.": "Absolutely. Zenith AI supports integrations with Slack, GitHub, Notion, Jira, and custom APIs to completely automate your workflow.",
+    "Câu hỏi thường gặp": "Frequently Asked Questions",
+    "Giải đáp các thắc mắc phổ biến nhất về Zenith AI.": "Answers to the most common questions about Zenith AI.",
+    "Zenith AI hoạt động dựa trên cấu trúc các Agent thông minh. Bạn tạo các file tài liệu hoặc ghi chú, sau đó chỉ định Agent (ví dụ: Agent nghiên cứu, Agent lập trình). Agent này có khả năng đọc hiểu ngữ cảnh của không gian làm việc và tự động thực hiện các câu lệnh phức tạp do bạn đưa ra.": "Zenith AI runs on intelligent Agents. You create document files or notes, then assign an Agent (e.g. Research Agent, Coder Agent). This Agent is capable of understanding workspace context and executing complex commands on your behalf.",
+    "An toàn dữ liệu là ưu tiên hàng đầu của chúng tôi. Tất cả tài liệu đều được mã hóa hoàn toàn ở trạng thái nghỉ và trong quá trình truyền tải. Với gói Doanh nghiệp, chúng tôi hỗ trợ triển khai trên đám mây riêng tư của bạn hoặc máy chủ nội bộ (on-premise) để kiểm soát dữ liệu tuyệt đối.": "Data security is our absolute priority. All documents are fully encrypted at rest and in transit. For the Enterprise plan, we support deployment on your private cloud or on-premise servers for complete data control.",
+    "Tôi có thể hủy gói dịch vụ bất kỳ lúc nào không?": "Can I cancel my plan at any time?",
+    "Có, hoàn toàn được. Bạn có thể thay đổi hoặc hủy đăng ký bất kỳ lúc nào ngay trong mục quản lý tài khoản của mình. Khi bạn hủy, bạn vẫn giữ quyền truy cập vào các tính năng Pro cho đến hết chu kỳ thanh toán hiện tại.": "Yes, absolutely. You can modify or cancel your subscription at any time within your account settings. Upon cancellation, you will retain access to Pro features until the end of your billing cycle.",
+    "Zenith AI có hỗ trợ ngôn ngữ tiếng Việt tốt không?": "Does Zenith AI support Vietnamese well?",
+    "Chắc chắn rồi. Các mô hình ngôn ngữ lớn làm nền tảng cho Zenith AI đều được tối ưu hóa xuất sắc cho tiếng Việt, giúp bạn viết tài liệu, tạo kịch bản, viết code hoặc ra lệnh cho Agent bằng tiếng Việt một cách tự nhiên và chính xác nhất.": "Certainly. The LLMs powering Zenith AI are highly optimized for Vietnamese, enabling you to write documents, draft scripts, code, or command Agents in Vietnamese naturally and accurately.",
 
     // Contact Section
     "Bạn có câu hỏi? Hãy gửi tin nhắn cho đội ngũ hỗ trợ của chúng tôi": "Have questions? Drop a message for our support team",
@@ -262,12 +331,42 @@ document.addEventListener('DOMContentLoaded', () => {
     "Nhập nội dung cần hỗ trợ...": "Type your message...",
     "Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.": "Message sent successfully! We will get back to you as soon as possible.",
     "Vui lòng điền đầy đủ các thông tin bắt buộc.": "Please fill in all required fields.",
+    "Bắt đầu hành trình của bạn ngay hôm nay": "Start Your Journey Today",
+    "Hãy liên hệ với chúng tôi để nhận bản dùng thử miễn phí 14 ngày của gói Pro hoặc đặt lịch demo tùy chỉnh cho doanh nghiệp của bạn.": "Get in touch with us to receive a 14-day free trial of the Pro plan, or schedule a customized demo for your business.",
+    "Gửi email trực tiếp": "Email Us Directly",
+    "Văn phòng đại diện": "Headquarters",
+    "Tầng 25, Keangnam Landmark, Hà Nội, Việt Nam": "25th Floor, Keangnam Landmark, Hanoi, Vietnam",
+    "Họ và tên": "Full Name",
+    "Bạn đang quan tâm đến gói nào?": "Which plan are you interested in?",
+    "Gói Chuyên nghiệp (Pro) - Bản dùng thử": "Professional (Pro) Plan - Trial Version",
+    "Gói Doanh nghiệp (Enterprise)": "Enterprise Plan",
+    "Tư vấn khác / Ý kiến đóng góp": "Other Inquiries / Feedback",
+    "Tin nhắn của bạn": "Your Message",
+    "Hãy viết yêu cầu cụ thể hoặc câu hỏi của bạn tại đây...": "Please write your specific request or question here...",
+    "Đăng ký thông tin": "Submit Registration",
 
-    // License key generator
-    "Mã Bản Quyền Pro": "Pro License Key",
-    "Đã tích hợp Matrix. Nhấp để tạo khóa dùng thử.": "Matrix integrated. Click to generate trial key.",
-    "Tạo Mã": "Generate Key",
-    "Đang tạo...": "Generating...",
+    // Footer
+    "Không gian làm việc thông minh tích hợp AI Agent độc lập, cách mạng hóa hiệu suất làm việc của bạn.": "Smart workspace integrated with autonomous AI Agents, revolutionizing your productivity.",
+    "Sản phẩm": "Product",
+    "Công ty": "Company",
+    "Pháp lý": "Legal",
+    "Blog công nghệ": "Tech Blog",
+    "Tuyển dụng": "Careers",
+    "Chính sách bảo mật": "Privacy Policy",
+    "Điều khoản dịch vụ": "Terms of Service",
+    "© 2026 Zenith AI. Tất cả các quyền được bảo lưu.": "© 2026 Zenith AI. All rights reserved.",
+    "/tháng": "/mo",
+    "/năm": "/yr",
+    "Thêm 1 AI Agent (+ $5/tháng)": "Add 1 AI Agent (+ $5/mo)",
+    "Thêm 10GB lưu trữ đám mây (+ $10/tháng)": "Add 10GB Cloud Storage (+ $10/mo)",
+    "Hỗ trợ kỹ thuật ưu tiên 24/7 (+ $15/tháng)": "Priority 24/7 Tech Support (+ $15/mo)",
+    "Không gian làm việc thông minh tích hợp trí tuệ nhân tạo, thúc đẩy năng suất và giải phóng tiềm năng sáng tạo của bạn.": "Smart workspace integrated with artificial intelligence, boosting productivity and unleashing your creative potential.",
+    "Trình mô phỏng": "Simulator",
+    "Về chúng tôi": "About Us",
+    "Điều khoản sử dụng": "Terms of Use",
+    "Chính sách Cookie": "Cookie Policy",
+    "© 2026 Zenith AI. Bảo lưu mọi quyền.": "© 2026 Zenith AI. All rights reserved.",
+    "Thiết kế bởi Đội ngũ Zenith AI": "Designed by Zenith AI Team",
 
     // Cart Drawer
     "Giỏ Hàng Của Bạn": "Your Shopping Cart",
@@ -289,6 +388,15 @@ document.addEventListener('DOMContentLoaded', () => {
     "Đã xóa khỏi mục yêu thích!": "Removed from favorites!",
     "Đang xử lý thanh toán...": "Processing checkout...",
     "Thanh toán thành công! Cảm ơn bạn.": "Checkout successful! Thank you.",
+    "🛒 Giỏ Hàng Gói Dịch Vụ": "🛒 Service Plan Cart",
+    "Gói dịch vụ": "Service Plan",
+    "Chọn thêm tiện ích (Add-ons):": "Select Add-ons:",
+    "Tạm tính:": "Subtotal:",
+    "Tổng cộng:": "Grand Total:",
+    "Lưu gói yêu thích": "Save Favorite Plan",
+    "Tiến hành đăng ký 🚀": "Proceed to Register 🚀",
+    "Gói đã xem gần đây:": "Recently Viewed Plans:",
+    "Gói yêu thích của bạn:": "Your Favorite Plans:",
 
     // Chatbot
     "Trợ lý Zenith AI": "Zenith AI Assistant",
@@ -299,22 +407,16 @@ document.addEventListener('DOMContentLoaded', () => {
     "Liên hệ hỗ trợ kỹ thuật ở đâu?": "Where is tech support?",
     "Nhập tin nhắn...": "Type a message...",
     "Đang trả lời...": "Replying...",
+    "Đang trực tuyến": "Online",
+    "Xin chào! Tôi là trợ lý ảo Zenith AI. Bạn cần tư vấn thông tin gì về sản phẩm?": "Hello! I am Zenith AI Assistant. What information do you need about our products?",
+    "🤖 Zenith AI là gì?": "🤖 What is Zenith AI?",
+    "💰 Giá các gói thế nào?": "💰 Pricing plans?",
+    "🔒 Có bảo mật không?": "🔒 Is it secure?",
+    "Nhập câu hỏi của bạn...": "Type your question...",
 
-    // Footer
-    "Không gian làm việc thông minh tích hợp AI Agent độc lập, cách mạng hóa hiệu suất làm việc của bạn.": "Smart workspace integrated with autonomous AI Agents, revolutionizing your productivity.",
-    "Sản phẩm": "Product",
-    "Công ty": "Company",
-    "Pháp lý": "Legal",
-    "Blog công nghệ": "Tech Blog",
-    "Tuyển dụng": "Careers",
-    "Chính sách bảo mật": "Privacy Policy",
-    "Điều khoản dịch vụ": "Terms of Service",
-    "© 2026 Zenith AI. Tất cả các quyền được bảo lưu.": "© 2026 Zenith AI. All rights reserved.",
-    "/tháng": "/mo",
-    "/năm": "/yr",
-    "Thêm 1 AI Agent (+ $5/tháng)": "Add 1 AI Agent (+ $5/mo)",
-    "Thêm 10GB lưu trữ đám mây (+ $10/tháng)": "Add 10GB Cloud Storage (+ $10/mo)",
-    "Hỗ trợ kỹ thuật ưu tiên 24/7 (+ $15/tháng)": "Priority 24/7 Tech Support (+ $15/mo)"
+    // Debug tooltips
+    "Bật Debug hành vi": "Enable behavior debug",
+    "Xóa nhật ký": "Clear log"
   };
 
   const enToVi = {};
@@ -335,10 +437,25 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       const tag = node.tagName.toLowerCase();
       if (tag !== 'script' && tag !== 'style' && tag !== 'svg') {
+        // Translate placeholders
         if (node.placeholder) {
           const trimmed = node.placeholder.trim();
           if (dictionary[trimmed]) {
             node.placeholder = dictionary[trimmed];
+          }
+        }
+        // Translate title attributes (tooltips)
+        if (node.title) {
+          const trimmed = node.title.trim();
+          if (dictionary[trimmed]) {
+            node.title = dictionary[trimmed];
+          }
+        }
+        // Translate custom data attributes
+        if (node.getAttribute('data-question')) {
+          const dq = node.getAttribute('data-question').trim();
+          if (dictionary[dq]) {
+            node.setAttribute('data-question', dictionary[dq]);
           }
         }
         node.childNodes.forEach(child => translateDOM(child, dictionary));
@@ -532,6 +649,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const answer = item.querySelector('.faq-answer');
         answer.style.maxHeight = answer.scrollHeight + 'px';
       }
+      
+      // Update cached height after FAQ transition completes
+      setTimeout(updateCachedDocHeight, 350);
     });
   });
 
@@ -1627,9 +1747,11 @@ Free 90% of your time spent on repetitive tasks using autonomous AI assistants:
   const scrollToTopBtn = document.getElementById('scroll-to-top');
 
   let cachedDocHeight = 0;
+  let cachedScrollHeight = 0;
   
   const updateCachedDocHeight = () => {
-    cachedDocHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    cachedScrollHeight = document.documentElement.scrollHeight;
+    cachedDocHeight = cachedScrollHeight - document.documentElement.clientHeight;
   };
   
   window.addEventListener('resize', updateCachedDocHeight);
@@ -1657,7 +1779,7 @@ Free 90% of your time spent on repetitive tasks using autonomous AI assistants:
     }
     
     // 3. Scrollspy fallback cho khi cuộn xuống dưới cùng trang
-    if (scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 30) {
+    if (scrollTop + window.innerHeight >= cachedScrollHeight - 30) {
       const navLinksList = document.querySelectorAll('.nav-link');
       navLinksList.forEach(link => {
         if (link.getAttribute('href') === '#contact') {
@@ -1760,7 +1882,7 @@ Free 90% of your time spent on repetitive tasks using autonomous AI assistants:
   const scrollspyObserver = new IntersectionObserver((entries) => {
     // Nếu chạm đáy thì để scroll listener xử lý
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    if (scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 30) {
+    if (scrollTop + window.innerHeight >= cachedScrollHeight - 30) {
       return;
     }
 
