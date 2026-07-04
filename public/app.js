@@ -470,10 +470,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.setAttribute('lang', lang);
     localStorage.setItem('zenith-lang', lang);
     
-    // Update button text to display what clicking it will switch to
+    // Update button text to display the current active language
     const langBtn = document.getElementById('lang-toggle-btn');
     if (langBtn) {
-      langBtn.textContent = lang === 'vi' ? 'EN' : 'VI';
+      langBtn.textContent = lang.toUpperCase();
     }
   };
 
@@ -487,6 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Khởi tạo ngôn ngữ ban đầu
+  const langBtnInit = document.getElementById('lang-toggle-btn');
+  if (langBtnInit) {
+    langBtnInit.textContent = currentLang.toUpperCase();
+  }
   if (currentLang === 'en') {
     setTimeout(() => switchLanguage('en'), 50);
   }
