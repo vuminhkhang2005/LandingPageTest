@@ -1607,10 +1607,13 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   grid-template-columns: 0.9fr 1.1fr;
   gap: var(--space-xl);
   align-items: center;
+  min-width: 0;
 }
 
 .contact-info {
   padding-right: var(--space-lg);
+  min-width: 0;
+  max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
@@ -1626,6 +1629,12 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   display: flex;
   align-items: flex-start;
   gap: var(--space-sm);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.detail-item > div {
+  min-width: 0;
 }
 
 .detail-icon {
@@ -1652,8 +1661,11 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 }
 
 .detail-value {
+  display: block;
   font-weight: 600;
   color: var(--text-primary);
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .contact-card-wrapper {
@@ -1663,18 +1675,24 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   border-radius: var(--radius-lg);
   box-shadow: var(--card-shadow);
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-width: 0;
 }
 
 .form-label {
@@ -1689,6 +1707,8 @@ html[data-theme="light"] .theme-toggle .moon-icon {
 }
 
 .form-input {
+  width: 100%;
+  min-width: 0;
   background-color: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
@@ -2094,10 +2114,34 @@ html[data-theme="light"] .section-skeleton .skel-card {
   .contact-container {
     grid-template-columns: 1fr;
     gap: var(--space-xl);
+    min-width: 0;
   }
 
   .contact-info {
-    padding: 0 var(--space-sm);
+    padding: 0;
+  }
+
+  .contact-info,
+  .contact-card-wrapper {
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .contact-info .section-title,
+  .contact-info .section-subtitle {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+
+  .contact-details,
+  .detail-item {
+    max-width: 100%;
+  }
+
+  .detail-value {
+    line-height: 1.45;
   }
 
   .footer-grid {
@@ -2108,6 +2152,48 @@ html[data-theme="light"] .section-skeleton .skel-card {
 @media (max-width: 768px) {
   .container {
     padding: 0 1.25rem;
+  }
+
+  .contact-section {
+    padding-bottom: calc(var(--space-xxl) + 5rem);
+  }
+
+  .contact-card-wrapper {
+    padding: 1.25rem;
+  }
+
+  .contact-form {
+    gap: 1rem;
+  }
+
+  .form-input {
+    padding: 0.7rem 0.875rem;
+    font-size: 0.9rem;
+  }
+
+  select.form-input {
+    padding-right: 1.875rem;
+    background-position: right 0.65rem center;
+    background-size: 1rem;
+  }
+
+  .debug-panel {
+    display: none;
+  }
+
+  .chatbot-container {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .chatbot-toggle-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .scroll-to-top-btn {
+    right: 16px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
   }
 
   .hide-mobile {
@@ -3036,5 +3122,33 @@ html[data-theme="light"] .pricing-card {
   }
   #generate-key-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .debug-panel {
+    display: none !important;
+  }
+
+  .chatbot-container {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .chatbot-toggle-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .scroll-to-top-btn {
+    right: 16px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+
+  body.contact-section-visible .chatbot-container,
+  body.contact-section-visible .scroll-to-top-btn {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 }

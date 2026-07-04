@@ -1805,6 +1805,32 @@ Free 90% of your time spent on repetitive tasks using autonomous AI assistants:
     });
   }
 
+  const contactSectionForFloatingControls = document.getElementById('contact');
+  const contactMobileQuery = window.matchMedia('(max-width: 768px)');
+  let isContactVisible = false;
+
+  const updateContactFloatingControls = () => {
+    body.classList.toggle('contact-section-visible', contactMobileQuery.matches && isContactVisible);
+  };
+
+  if (contactSectionForFloatingControls) {
+    const contactFloatingObserver = new IntersectionObserver((entries) => {
+      isContactVisible = entries.some(entry => entry.isIntersecting);
+      updateContactFloatingControls();
+    }, {
+      root: null,
+      threshold: 0.12
+    });
+
+    contactFloatingObserver.observe(contactSectionForFloatingControls);
+
+    if (contactMobileQuery.addEventListener) {
+      contactMobileQuery.addEventListener('change', updateContactFloatingControls);
+    } else if (contactMobileQuery.addListener) {
+      contactMobileQuery.addListener(updateContactFloatingControls);
+    }
+  }
+
   /* ==========================================================================
      Bonus 4: License Key Generator (Matrix Effect)
      ========================================================================== */
