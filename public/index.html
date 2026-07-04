@@ -48,7 +48,8 @@
   </style>
 
   <!-- Style CSS -->
-  <link rel="stylesheet" href="style.min.css?v=28">
+  <link rel="preload" href="style.min.css?v=28" as="style">
+  <link rel="stylesheet" href="style.min.css?v=28" media="print" onload="this.media='all';document.body.classList.remove('css-loading')">
   <noscript>
     <link rel="stylesheet" href="style.min.css?v=28">
   </noscript>
@@ -104,6 +105,9 @@
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
           </svg>
         </button>
+
+        <!-- Language Toggle Button -->
+        <button class="theme-toggle" id="lang-toggle-btn" aria-label="Toggle language" style="font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem;">EN</button>
 
         <a href="#contact" class="btn btn-secondary btn-sm hide-mobile">Đăng ký thử nghiệm</a>
         
