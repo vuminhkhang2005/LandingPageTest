@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Zenith AI - Premium Design System & Stylesheet
    ========================================================================== */
 
@@ -1609,6 +1609,12 @@ html[data-theme="light"] .theme-toggle .moon-icon {
   align-items: center;
 }
 
+.contact-info {
+  padding-right: var(--space-lg);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 .contact-details {
   margin-top: var(--space-lg);
   display: flex;
@@ -2088,6 +2094,10 @@ html[data-theme="light"] .section-skeleton .skel-card {
   .contact-container {
     grid-template-columns: 1fr;
     gap: var(--space-xl);
+  }
+
+  .contact-info {
+    padding: 0 var(--space-sm);
   }
 
   .footer-grid {
